@@ -1,0 +1,50 @@
+[
+    {
+      "No": "1",
+      "User": "Pfeffer",
+      "Role": "Admin",
+      "NIP": "92134",
+      "ContactNumber": "12/02/2023",
+      "missionStatement": "strategize intuitive infrastructures"
+    },
+    {
+      "No": "2",
+      "User": "Hettinger",
+      "Role": "User",
+      "NIP": "67675",
+      "ContactNumber": "12/02/2023",
+      "missionStatement": "mesh sexy synergies"
+    },
+    {
+      "No": "3",
+      "User": "Champlin",
+      "Role": "Admin",
+      "NIP": "55112",
+      "ContactNumber": "12/02/2023",
+      "missionStatement": "incentivize end-to-end e-markets"
+    },
+    {
+      "No": "4",
+      "User": "Zulauf",
+      "Role": "User",
+      "NIP": "00989",
+      "ContactNumber": "12/02/2023",
+      "missionStatement": "revolutionize holistic action-items"
+    },
+    {
+      "No": "5",
+      "User": "Shanahan",
+      "Role": "User",
+      "NIP": "33018",
+      "ContactNumber": "12/02/2023",
+      "missionStatement": "reinvent visionary markets"
+    },
+    {
+      "No": "6",
+      "User": "Gutkowski",
+      "Role": "User",
+      "NIP": "44563",
+      "ContactNumber": "12/02/2023",
+      "missionStatement": "mesh e-business schemas"
+    }
+  ]
