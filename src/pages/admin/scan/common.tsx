@@ -79,35 +79,14 @@ const SimpleTable: NextPageWithLayout = () => {
 					item: 'nama item',
 					qty: 'qty reservasi',
 					progress: 'qty his scanned',
-					status: 'hai',
+					status: 'gagal',
 				},
 				{
 					no: 2,
 					item: 'nama item',
 					qty: 'qty reservasi',
 					progress: 'qty his scanned',
-					status: 'hai',
-				},
-				{
-					no: 3,
-					item: 'nama item',
-					qty: 'qty reservasi',
-					progress: 'qty his scanned',
-					status: 'hai',
-				},
-				{
-					no: 4,
-					item: 'nama item',
-					qty: 'qty reservasi',
-					progress: 'qty his scanned',
-					status: 'hai',
-				},
-				{
-					no: 5,
-					item: 'nama item',
-					qty: 'qty reservasi',
-					progress: 'qty his scanned',
-					status: 'hai',
+					status: 'berhasil',
 				},
 			];
 
@@ -117,12 +96,41 @@ const SimpleTable: NextPageWithLayout = () => {
 					<td>{element.item}</td>
 					<td>{element.progress}</td>
 					<td>{element.qty}</td>
-					<td>{element.status}</td>
+					<td>
+						<span
+							className={element.status === 'berhasil' ? 'success' : 'failure'}
+						></span>
+					</td>
 				</tr>
 			));
 
+			const styles = `
+			.success {
+				display: inline-block;
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background-color: green;
+				margin-right: 5px;
+			}
+
+			.failure {
+				display: inline-block;
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background-color: red;
+				margin-right: 5px;
+			}
+
+			.status-text {
+				display: none;
+			}
+`;
+
 			return (
 				<>
+					<style>{styles}</style>
 					<Group style={{ width: '400px', marginTop: '-160px' }}>
 						<p>Reservasi Baru:</p>
 						<p>[reservasi baru]</p>
