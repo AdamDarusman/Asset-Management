@@ -14,21 +14,48 @@ import {
 import { useRouter } from 'next/router';
 import { NextPageWithLayout } from './_app';
 import { SyntheticEvent, useState } from 'react';
-import axios from 'axios';
+import api from 'src/lib/axios';
+// import setCookie from 'cookies-next'
+import { setCookie } from 'cookies-next';
 
 const SignIn: NextPageWithLayout = () => {
 	const router = useRouter();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 
-	async function handleSubmit(e: SyntheticEvent) {
-		e.preventDefault();
-		const res = await fetch('http://localhost:8000/auth/login', {
-			email,
-			password,
+	// async function handleSubmit(e: SyntheticEvent) {
+	// 	e.preventDefault();
+	// 	const res = await axios.post('/auth/login', {
+	// 		email,
+	// 		password,
+	// 	});
+	// 	console.log(res);
+	// }
+
+	// const handleSubmit = async () => {
+	// 	try {
+	// 		const response = await api.post('/auth/login', { email, password });
+	// 	} catch (err) {
+	// 		console.error(err);
+	// 	}
+	// };
+
+	const handleSubmit = async () => {
+		const res = await api.post('/auth/login', {
+			email: email,
+			password: password,
 		});
+
 		console.log(res);
-	}
+		setCookie('authorization', `Bearer ${res.data.access_token}`, {
+			maxAge: 60 * 6 * 24,
+		});
+		try {
+			router.push('/admin/home');
+		} catch (error) {
+			return <p>error</p>;
+		}
+	};
 
 	return (
 		<>

@@ -14,64 +14,11 @@ import {
 } from '@mantine/core';
 import { IconEdit, IconEye, IconPlus, IconScan, IconTrash } from '@tabler/icons-react';
 import companies from './companies.json';
+import api from '@/lib/axios';
 
 const SimpleTable: NextPageWithLayout = () => {
 	const [selectedRows, setSelectedRows] = useState<number[]>([]);
 	const [selectAll, setSelectAll] = useState(false);
-
-	const elements = [
-		{
-			id: 1,
-			user: 'nama1',
-			role: 'Admin',
-			nip: '45321',
-			contactNumber: '087626679134',
-			action: 'active',
-		},
-		{
-			id: 2,
-			user: 'nama1',
-			role: 'Operator',
-			nip: '39321',
-			contactNumber: '087626679134',
-			action: 'active',
-		},
-		{
-			id: 3,
-			user: 'nama1',
-			role: 'Admin',
-			nip: '45321',
-			contactNumber: '087626679134',
-			action: 'active',
-		},
-
-		{
-			id: 4,
-			user: 'nama1',
-			role: 'User',
-			nip: '45321',
-			contactNumber: '087626679134',
-			action: 'active',
-		},
-
-		{
-			id: 5,
-			user: 'nama1',
-			role: 'Super Admin',
-			nip: '45321',
-			contactNumber: '087626679134',
-			action: 'active',
-		},
-
-		{
-			id: 6,
-			user: 'nama1',
-			role: 'User',
-			nip: '65437',
-			contactNumber: '087626679134',
-			action: 'active',
-		},
-	];
 
 	const ths = (
 		<tr>
@@ -91,6 +38,16 @@ const SimpleTable: NextPageWithLayout = () => {
 			<th>Action</th>
 		</tr>
 	);
+
+	const [elements, setElements] = useState([]);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			const response = await api.get('/api/show-all-user');
+			setElements(response.data);
+		};
+		fetchData();
+	}, []);
 
 	const rows = elements.map(element => (
 		<tr key={element.id}>
