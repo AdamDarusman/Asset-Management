@@ -1,9 +1,11 @@
+/* eslint-disable no-mixed-operators */
 import React, { useEffect, useState } from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { PageContainer } from '@/components/PageContainer';
 import {
 	ActionIcon,
+	Avatar,
 	Button,
 	Checkbox,
 	Group,
@@ -13,19 +15,25 @@ import {
 	Table,
 } from '@mantine/core';
 import { IconEdit, IconEye, IconPlus, IconScan, IconTrash } from '@tabler/icons-react';
-import companies from './companies.json';
 import api from '@/lib/axios';
+import { useRouter } from 'next/router';
+import UpdateUser from './edit';
 
 const SimpleTable: NextPageWithLayout = () => {
 	const [selectedRows, setSelectedRows] = useState<number[]>([]);
 	const [selectAll, setSelectAll] = useState(false);
 
 	const [elements, setElements] = useState([]);
+	const router = useRouter();
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await api.get('/api/show-all-user');
+				const response = await api.get('/api/show-all-user', {
+					headers: {
+						'Cache-Control': 'no-cache',
+					},
+				});
 				// console.log('Response data:', response.data);
 				setElements(response.data);
 			} catch (error) {
@@ -34,6 +42,11 @@ const SimpleTable: NextPageWithLayout = () => {
 		};
 		fetchData();
 	}, []);
+
+	async function deleteUser(id) {
+		await api.post(`/api/${id}/delete`);
+		router.push('/admin/form/common');
+	}
 
 	const ths = (
 		<tr>
@@ -47,7 +60,6 @@ const SimpleTable: NextPageWithLayout = () => {
 				/>
 			</th>
 			<th>User</th>
-			<th>Email</th>
 			<th>Role</th>
 			<th>NIP</th>
 			<th>Contact Number</th>
@@ -55,49 +67,28 @@ const SimpleTable: NextPageWithLayout = () => {
 		</tr>
 	);
 
-	// const rows = elements
-	// 	? elements.map(element => (
-	// 			<tr key={element.id}>
-	// <td>
-	// 	<Checkbox
-	// 		checked={selectedRows.includes(element.id)}
-	// 		onChange={e => {
-	// 			setSelectedRows(prev =>
-	// 				e.target.checked
-	// 					? [...prev, element.id]
-	// 					: prev.filter(id => id !== element.id)
-	// 			);
-	// 		}}
-	// 	/>
-	// </td>
-	// 				<td>{element.name}</td>
-	// 				<td>{element.roleId}</td>
-	// 				<td>{element.nip}</td>
-	// 				<td>{element.contactNumber}</td>
-	// 				<td>
-	// <Group>
-	// 	<ActionIcon color="green" onClick={() => console.log('Edit:', element.id)}>
-	// 		<IconScan size={16} />
-	// 	</ActionIcon>
-	// 	<ActionIcon
-	// 		component="a"
-	// 		href="/admin/form/view"
-	// 		color="blue"
-	// 		onClick={() => console.log('Edit:', element.id)}
-	// 	>
-	// 		<IconEye size={16} />
-	// 	</ActionIcon>
-	// 	<ActionIcon color="yellow" onClick={() => console.log('Edit:', element.id)}>
-	// 		<IconEdit size={16} />
-	// 	</ActionIcon>
-	// 	<ActionIcon color="red" onClick={() => console.log('Edit:', element.id)}>
-	// 		<IconTrash size={16} />
-	// 	</ActionIcon>
-	// </Group>
-	// 				</td>
-	// 			</tr>
-	// 	  ))
-	// 	: null;
+	//pagination
+	const [activePage, setActivePage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const ITEMS_PER_PAGE = 5;
+	const totalItems = elements.length;
+	const startIndex = (activePage - 1) * ITEMS_PER_PAGE;
+	const endIndex = Math.min(startIndex + ITEMS_PER_PAGE - 1, totalItems - 1);
+
+	useEffect(() => {
+		const newTotalPages = Math.ceil(elements.length / ITEMS_PER_PAGE);
+		if (newTotalPages !== totalPages) {
+			setActivePage(1);
+			setTotalPages(newTotalPages);
+		}
+		if (newTotalPages > 5) {
+			setTotalPages(5);
+		}
+	}, [elements, ITEMS_PER_PAGE, totalPages]);
+
+	const handlePageChange = newPage => {
+		setActivePage(newPage);
+	};
 
 	return (
 		<>
@@ -114,8 +105,8 @@ const SimpleTable: NextPageWithLayout = () => {
 				<Table captionSide="bottom" striped highlightOnHover>
 					<thead>{ths}</thead>
 					<tbody>
-						{elements.map((element, index) => (
-							<tr key={element.id}>
+						{elements.slice(startIndex, endIndex + 1).map((element, index) => (
+							<tr key={index}>
 								<td>
 									<Checkbox
 										checked={selectedRows.includes(element.id)}
@@ -128,8 +119,23 @@ const SimpleTable: NextPageWithLayout = () => {
 										}}
 									/>
 								</td>
-								<td> {element.name} </td>
-								<td> {element.email} </td>
+								<td>
+									<Group style={{ height: '50px' }}>
+										<Avatar size={'md'} radius="xl" style={{ marginBottom: '5px' }} />
+										<div style={{ marginTop: '-10px' }}>
+											<p
+												style={{
+													fontWeight: 'bold',
+													fontSize: '14px',
+													marginBottom: '-15px',
+												}}
+											>
+												{element.name}
+											</p>
+											<p style={{ fontSize: '12px', color: 'gray' }}>{element.email}</p>
+										</div>
+									</Group>
+								</td>
 								<td> {element.role.name} </td>
 								<td> {element.nip} </td>
 								<td> {element.nip} </td>
@@ -152,13 +158,15 @@ const SimpleTable: NextPageWithLayout = () => {
 										</ActionIcon>
 										<ActionIcon
 											color="yellow"
-											onClick={() => console.log('Edit:', element.id)}
+											component="a"
+											onClick={() => UpdateUser(element.id)}
 										>
 											<IconEdit size={16} />
 										</ActionIcon>
 										<ActionIcon
 											color="red"
-											onClick={() => console.log('Edit:', element.id)}
+											onClick={() => deleteUser(element.id)}
+											// onClick={() => console.log('Hapus:', element.id)}
 										>
 											<IconTrash size={16} />
 										</ActionIcon>
@@ -170,18 +178,24 @@ const SimpleTable: NextPageWithLayout = () => {
 				</Table>
 			</PageContainer>
 			<Space h="xl" />
-			<Space h="xl" />
-			<div style={{ display: 'flex' }}>
-				<Select
-					maw={200}
-					placeholder="Select Number"
-					data={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
-				/>
-				<Space w="xl" />
-				<Space w="xl" />
-				<Space w="xl" />
-				{companies.length > 0 && <Pagination style={{ margin: 'auto' }} total={1} />}
-				{/* <Pagination position="center" total={10} withEdges /> */}
+			<div style={{ display: 'flex', marginLeft: '20px' }}>
+				<div style={{ display: 'flex' }}>
+					<Select
+						maw={200}
+						placeholder="Select Number"
+						data={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
+					/>
+					<Space w="xl" />
+					<Space w="xl" />
+					<Space w="xl" />
+					<Pagination
+						style={{ marginLeft: '150px' }}
+						totalPages={totalPages}
+						activePage={activePage}
+						onChange={handlePageChange}
+						total={totalPages}
+					/>
+				</div>
 			</div>
 		</>
 	);

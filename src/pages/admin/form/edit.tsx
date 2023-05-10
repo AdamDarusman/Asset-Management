@@ -16,14 +16,14 @@ import api from '@/lib/axios';
 import { useRouter } from 'next/router';
 import { IMaskInput } from 'react-imask';
 
-const SimpleTable: NextPageWithLayout = () => {
-	const [name, setName] = useState('');
-	const [email, setEmail] = useState('');
-	const [selectedRole, setSelectedRole] = useState('');
-	const [nip, setNip] = useState('');
-	const [contactNumber, setContactNumber] = useState('');
-	const [picture, setPicture] = useState('');
-	const [password, setPassword] = useState('');
+const UpdateUser = ({ users }) => {
+	const [name, setName] = useState(users.name);
+	const [email, setEmail] = useState(users.email);
+	const [selectedRole, setSelectedRole] = useState(users.role);
+	const [nip, setNip] = useState(users.nip);
+	const [contactNumber, setContactNumber] = useState(users.contactNumber);
+	const [picture, setPicture] = useState(users.picture);
+	const [password, setPassword] = useState(users.password);
 
 	const router = useRouter();
 	const [roles, setRoles] = useState([]);
@@ -59,8 +59,8 @@ const SimpleTable: NextPageWithLayout = () => {
 	// 	router.push('/admin/form/common');
 	// }
 
-	async function handleSubmit() {
-		await api.post('/api/register', {
+	async function handleUpdate(id) {
+		await api.patch(`/api/${id}/edit`, {
 			name,
 			email,
 			password,
@@ -90,6 +90,7 @@ const SimpleTable: NextPageWithLayout = () => {
 			<Input.Wrapper id="input-demo" withAsterisk label="Name">
 				<Input
 					onChange={e => setName(e.target.value)}
+					value={name}
 					variant="filled"
 					id="input-demo"
 					placeholder="Your name"
@@ -156,12 +157,12 @@ const SimpleTable: NextPageWithLayout = () => {
 				<Button component="a" href="/admin/form/common" variant="outline">
 					Back
 				</Button>
-				<Button onClick={handleSubmit}>Save</Button>
+				<Button onClick={handleUpdate}>Save</Button>
 			</Group>
 		</>
 	);
 };
 
-SimpleTable.getLayout = page => <AdminLayout>{page}</AdminLayout>;
+UpdateUser.getLayout = page => <AdminLayout>{page}</AdminLayout>;
 
-export default SimpleTable;
+export default UpdateUser;
