@@ -1,19 +1,7 @@
 import React from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
-import {
-	Button,
-	Group,
-	Image,
-	Space,
-	Text,
-	Input,
-	PasswordInput,
-	Divider,
-	TextInput,
-	Tooltip,
-} from '@mantine/core';
-import { IconAt, IconFileText, IconArrowBack } from '@tabler/icons-react';
+import { Button, Group, Image, Space, Input } from '@mantine/core';
 
 const SimpleTable: NextPageWithLayout = () => {
 	return (

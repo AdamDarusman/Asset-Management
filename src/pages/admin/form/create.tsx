@@ -11,10 +11,12 @@ import {
 	PasswordInput,
 	Divider,
 	Select,
+	CheckIcon,
 } from '@mantine/core';
 import api from '@/lib/axios';
 import { useRouter } from 'next/router';
 import { IMaskInput } from 'react-imask';
+import { notifications } from '@mantine/notifications';
 
 const SimpleTable: NextPageWithLayout = () => {
 	const [name, setName] = useState('');
@@ -40,36 +42,35 @@ const SimpleTable: NextPageWithLayout = () => {
 		fetchData();
 	}, []);
 
-	// async function handleSubmit() {
-	// 	await fetch('http://localhost:8000/api/register', {
-	// 		method: 'POST',
-	// 		headers: {
-	// 			'Content-Type': 'application/json',
-	// 		},
-	// 		body: JSON.stringify({
-	// 			name,
-	// 			email,
-	// 			password,
-	// 			nip,
-	// 			contactNumber,
-	// 			picture,
-	// 			role: selectedRole,
-	// 		}),
-	// 	});
-	// 	router.push('/admin/form/common');
-	// }
-
 	async function handleSubmit() {
-		await api.post('/api/register', {
-			name,
-			email,
-			password,
-			nip,
-			contactNumber,
-			picture,
-			roleId: selectedRole,
-		});
-		router.push('/admin/form/common');
+		try {
+			await api.post('/api/register', {
+				name,
+				email,
+				password,
+				nip,
+				contactNumber,
+				picture,
+				roleId: selectedRole,
+			});
+			notifications.show({
+				title: 'Success',
+				message: 'Your registration has been successfully submitted!',
+				color: 'teal',
+				icon: <CheckIcon />,
+				autoClose: 5000,
+			});
+			router.push('/admin/form/common');
+		} catch (error) {
+			console.error(error);
+			notifications.show({
+				title: 'Error',
+				message: 'Failed to submit your registration. Please try again later.',
+				color: 'red',
+				// icon: <CloseIcon />,
+				autoClose: 5000,
+			});
+		}
 	}
 
 	const roleOptions = roles.map(role => ({ value: role.id, label: role.name }));

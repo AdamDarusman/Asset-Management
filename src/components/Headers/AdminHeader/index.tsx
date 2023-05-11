@@ -47,7 +47,7 @@ export function AdminHeader({ burger }: Props) {
 							Transfer my data
 						</Menu.Item>
 						<Menu.Item color="red" icon={<IconTrash size={14} />}>
-							Delete my account
+							Log Out
 						</Menu.Item>
 					</Menu.Dropdown>
 				</Menu>

@@ -17,9 +17,11 @@ import {
 import { IconEdit, IconEye, IconPlus, IconScan, IconTrash } from '@tabler/icons-react';
 import api from '@/lib/axios';
 import { useRouter } from 'next/router';
-import UpdateUser from './edit';
+import { showNotification } from '@mantine/notifications';
+// import { confirmAlert } from 'react-confirm-alert';
+// import 'react-confirm-alert/src/react-confirm-alert.css';
 
-const SimpleTable: NextPageWithLayout = () => {
+const UserTable: NextPageWithLayout = () => {
 	const [selectedRows, setSelectedRows] = useState<number[]>([]);
 	const [selectAll, setSelectAll] = useState(false);
 
@@ -44,9 +46,29 @@ const SimpleTable: NextPageWithLayout = () => {
 	}, []);
 
 	async function deleteUser(id) {
-		await api.post(`/api/${id}/delete`);
-		router.push('/admin/form/common');
+		try {
+			await api.post(`/api/${id}/delete`);
+			setElements(prevElements => prevElements.filter(element => element.id !== id));
+			showNotification({
+				title: 'Berhasil!',
+				message: 'Data berhasil dihapus',
+				color: 'green',
+			});
+		} catch (error) {
+			showNotification({
+				title: 'Gagal!',
+				message: 'Terjadi kesalahan saat menghapus data',
+			});
+		}
 	}
+
+	const editPg = id => {
+		router.push(`/admin/form/edit/${id}`);
+	};
+
+	const show = id => {
+		router.push(`/admin/form/view/${id}`);
+	};
 
 	const ths = (
 		<tr>
@@ -138,7 +160,7 @@ const SimpleTable: NextPageWithLayout = () => {
 								</td>
 								<td> {element.role.name} </td>
 								<td> {element.nip} </td>
-								<td> {element.nip} </td>
+								<td> {element.contactNumber} </td>
 								<td>
 									{' '}
 									<Group>
@@ -150,24 +172,19 @@ const SimpleTable: NextPageWithLayout = () => {
 										</ActionIcon>
 										<ActionIcon
 											component="a"
-											href="/admin/form/view"
 											color="blue"
-											onClick={() => console.log('Edit:', element.id)}
+											onClick={() => show(element.id)}
 										>
 											<IconEye size={16} />
 										</ActionIcon>
 										<ActionIcon
 											color="yellow"
 											component="a"
-											onClick={() => UpdateUser(element.id)}
+											onClick={() => editPg(element.id)}
 										>
 											<IconEdit size={16} />
 										</ActionIcon>
-										<ActionIcon
-											color="red"
-											onClick={() => deleteUser(element.id)}
-											// onClick={() => console.log('Hapus:', element.id)}
-										>
+										<ActionIcon color="red" onClick={() => deleteUser(element.id)}>
 											<IconTrash size={16} />
 										</ActionIcon>
 									</Group>{' '}
@@ -201,6 +218,6 @@ const SimpleTable: NextPageWithLayout = () => {
 	);
 };
 
-SimpleTable.getLayout = page => <AdminLayout>{page}</AdminLayout>;
+UserTable.getLayout = page => <AdminLayout>{page}</AdminLayout>;
 
-export default SimpleTable;
+export default UserTable;

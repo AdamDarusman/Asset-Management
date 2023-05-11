@@ -16,14 +16,24 @@ import api from '@/lib/axios';
 import { useRouter } from 'next/router';
 import { IMaskInput } from 'react-imask';
 
-const UpdateUser = ({ users }) => {
-	const [name, setName] = useState(users.name);
-	const [email, setEmail] = useState(users.email);
-	const [selectedRole, setSelectedRole] = useState(users.role);
-	const [nip, setNip] = useState(users.nip);
-	const [contactNumber, setContactNumber] = useState(users.contactNumber);
-	const [picture, setPicture] = useState(users.picture);
-	const [password, setPassword] = useState(users.password);
+export async function getServerSideProps(context) {
+	const { id } = context.query;
+	const user = await fetch(`http://localhost:8000/api/${id}/show`).then(res =>
+		res.json()
+	);
+	return { props: { user } };
+}
+
+const UpdateUser = ({ user }) => {
+	console.log(user);
+
+	const [name, setName] = useState(user.name);
+	const [email, setEmail] = useState(user.email);
+	const [selectedRole, setSelectedRole] = useState(user.role ? user.role.id : '');
+	const [nip, setNip] = useState(user.nip);
+	const [contactNumber, setContactNumber] = useState(user.contactNumber);
+	const [picture, setPicture] = useState(user.picture);
+	const [password, setPassword] = useState(user.password);
 
 	const router = useRouter();
 	const [roles, setRoles] = useState([]);
@@ -39,25 +49,6 @@ const UpdateUser = ({ users }) => {
 		};
 		fetchData();
 	}, []);
-
-	// async function handleSubmit() {
-	// 	await fetch('http://localhost:8000/api/register', {
-	// 		method: 'POST',
-	// 		headers: {
-	// 			'Content-Type': 'application/json',
-	// 		},
-	// 		body: JSON.stringify({
-	// 			name,
-	// 			email,
-	// 			password,
-	// 			nip,
-	// 			contactNumber,
-	// 			picture,
-	// 			role: selectedRole,
-	// 		}),
-	// 	});
-	// 	router.push('/admin/form/common');
-	// }
 
 	async function handleUpdate(id) {
 		await api.patch(`/api/${id}/edit`, {
@@ -101,6 +92,7 @@ const UpdateUser = ({ users }) => {
 					variant="filled"
 					id="input-demo"
 					placeholder="Your email"
+					value={email}
 					onChange={e => setEmail(e.target.value)}
 				/>
 			</Input.Wrapper>
@@ -109,7 +101,13 @@ const UpdateUser = ({ users }) => {
 				label="Password"
 				variant="filled"
 				withAsterisk
-				onChange={e => setPassword(e.target.value)}
+				onChange={e => {
+					if (e.target.value === null || e.target.value === '') {
+						setPassword(password);
+					} else {
+						setPassword(e.target.value);
+					}
+				}}
 			/>
 			{roles && (
 				<Select
@@ -119,6 +117,7 @@ const UpdateUser = ({ users }) => {
 					withAsterisk
 					data={roleOptions}
 					onChange={roleOptions => setSelectedRole(roleOptions)}
+					value={selectedRole}
 					// value={selectedRole}
 				/>
 			)}
@@ -138,6 +137,7 @@ const UpdateUser = ({ users }) => {
 						component={IMaskInput}
 						mask="+62 000-0000-0000"
 						placeholder="Contact Number"
+						value={String(contactNumber)}
 						onChange={e => setContactNumber(e.target.value)}
 					/>
 				</Input.Wrapper>
@@ -148,6 +148,7 @@ const UpdateUser = ({ users }) => {
 						variant="filled"
 						id="input-demo"
 						placeholder="Your NIP"
+						value={nip}
 						onChange={e => setNip(e.target.value)}
 					/>
 				</Input.Wrapper>
@@ -157,7 +158,7 @@ const UpdateUser = ({ users }) => {
 				<Button component="a" href="/admin/form/common" variant="outline">
 					Back
 				</Button>
-				<Button onClick={handleUpdate}>Save</Button>
+				<Button onClick={() => handleUpdate(user.id)}>Save</Button>
 			</Group>
 		</>
 	);
