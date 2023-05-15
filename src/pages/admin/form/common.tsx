@@ -18,8 +18,6 @@ import { IconEdit, IconEye, IconPlus, IconScan, IconTrash } from '@tabler/icons-
 import api from '@/lib/axios';
 import { useRouter } from 'next/router';
 import { showNotification } from '@mantine/notifications';
-// import { confirmAlert } from 'react-confirm-alert';
-// import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const UserTable: NextPageWithLayout = () => {
 	const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -36,7 +34,6 @@ const UserTable: NextPageWithLayout = () => {
 						'Cache-Control': 'no-cache',
 					},
 				});
-				// console.log('Response data:', response.data);
 				setElements(response.data);
 			} catch (error) {
 				console.error(error);
@@ -92,24 +89,28 @@ const UserTable: NextPageWithLayout = () => {
 	//pagination
 	const [activePage, setActivePage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
-	const ITEMS_PER_PAGE = 5;
 	const totalItems = elements.length;
-	const startIndex = (activePage - 1) * ITEMS_PER_PAGE;
-	const endIndex = Math.min(startIndex + ITEMS_PER_PAGE - 1, totalItems - 1);
+	const [itemsPerPage, setItemsPerPage] = useState(5);
+	const startIndex = (activePage - 1) * itemsPerPage;
+	const endIndex = Math.min(startIndex + itemsPerPage - 1, totalItems - 1);
 
 	useEffect(() => {
-		const newTotalPages = Math.ceil(elements.length / ITEMS_PER_PAGE);
+		const newTotalPages = Math.ceil(elements.length / itemsPerPage);
 		if (newTotalPages !== totalPages) {
 			setActivePage(1);
 			setTotalPages(newTotalPages);
 		}
-		if (newTotalPages > 5) {
-			setTotalPages(5);
+		if (newTotalPages > 100) {
+			setTotalPages(100);
 		}
-	}, [elements, ITEMS_PER_PAGE, totalPages]);
+	}, [elements, itemsPerPage, totalPages]);
 
 	const handlePageChange = newPage => {
 		setActivePage(newPage);
+	};
+
+	const handleItemsPerPageChange = value => {
+		setItemsPerPage(parseInt(value));
 	};
 
 	return (
@@ -200,11 +201,9 @@ const UserTable: NextPageWithLayout = () => {
 					<Select
 						maw={200}
 						placeholder="Select Number"
-						data={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
+						data={['5', '10', '20']}
+						onChange={handleItemsPerPageChange}
 					/>
-					<Space w="xl" />
-					<Space w="xl" />
-					<Space w="xl" />
 					<Pagination
 						style={{ marginLeft: '150px' }}
 						totalPages={totalPages}

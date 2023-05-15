@@ -30,13 +30,13 @@ export function AdminLayout({ children }: Props) {
 					}
 				/>
 			}
-			footer={
-				<Footer height={50} p="md">
-					<Text w="full" size="sm" align="center" color="gray">
-						CopyRight © 2023 Indonesia
-					</Text>
-				</Footer>
-			}
+			// footer={
+			// 	<Footer height={50} p="md">
+			// 		<Text w="full" size="sm" align="center" color="gray">
+			// 			CopyRight © 2023 Indonesia
+			// 		</Text>
+			// 	</Footer>
+			// }
 		>
 			<Container fluid>{children}</Container>
 		</AppShell>

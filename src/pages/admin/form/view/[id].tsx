@@ -49,7 +49,7 @@ const ShowUser = ({ user }) => {
 			<Space w="xl" />
 			<Space w="xl" />
 			<Space w="xl" />
-			<Group style={{ width: '525px', marginTop: '50px', marginLeft: '-250px' }}>
+			<Group style={{ width: '525px', marginTop: '70px', marginLeft: '-250px' }}>
 				<Paper
 					style={{
 						width: '100%',

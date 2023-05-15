@@ -1,50 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
-import {
-	Button,
-	Group,
-	Image,
-	Space,
-	Text,
-	Input,
-	PasswordInput,
-	Divider,
-} from '@mantine/core';
+import { Button, CheckIcon, Group, Input } from '@mantine/core';
 import { IconAt, IconFileText, IconArrowBack } from '@tabler/icons-react';
+import api from '@/lib/axios';
+import { notifications } from '@mantine/notifications';
+import router from 'next/router';
 
 const SimpleTable: NextPageWithLayout = () => {
-	function showInfo(company: {
-		id: string;
-		User: string;
-		Role: string;
-		NIP: string;
-		ContactNumber: string;
-		missionStatement: string;
-	}): void {
-		// throw new Error('Function not implemented.');
-	}
+	const [name, setName] = useState('');
 
-	function editInfo(company: {
-		id: string;
-		User: string;
-		Role: string;
-		NIP: string;
-		ContactNumber: string;
-		missionStatement: string;
-	}): void {
-		// throw new Error('Function not implemented.');
-	}
-
-	function deleteCompany(company: {
-		id: string;
-		User: string;
-		Role: string;
-		NIP: string;
-		ContactNumber: string;
-		missionStatement: string;
-	}): void {
-		// throw new Error('Function not implemented.');
+	async function handleSubmit() {
+		try {
+			await api.post('/role/create-role', {
+				name,
+			});
+			notifications.show({
+				title: 'Success',
+				message: 'Your registration has been successfully submitted!',
+				color: 'teal',
+				icon: <CheckIcon />,
+				autoClose: 5000,
+			});
+			router.push('/admin/role/upload');
+		} catch (error) {
+			console.error(error);
+			notifications.show({
+				title: 'Error',
+				message: 'Failed to submit your registration. Please try again later.',
+				color: 'red',
+				// icon: <CloseIcon />,
+				autoClose: 5000,
+			});
+		}
 	}
 
 	return (
@@ -72,11 +60,12 @@ const SimpleTable: NextPageWithLayout = () => {
 						size="md"
 						placeholder="Your name"
 						icon={<IconAt size="0.8rem" />}
+						onChange={e => setName(e.target.value)}
 					/>
 				</Input.Wrapper>
 			</Group>
 			<Group position="right">
-				<Button>Submit</Button>
+				<Button onClick={handleSubmit}>Submit</Button>
 			</Group>
 		</>
 	);
