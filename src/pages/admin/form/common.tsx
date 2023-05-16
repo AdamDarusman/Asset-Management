@@ -129,7 +129,7 @@ const UserTable: NextPageWithLayout = () => {
 					<thead>{ths}</thead>
 					<tbody>
 						{elements.slice(startIndex, endIndex + 1).map((element, index) => (
-							<tr key={index}>
+							<tr key={element.key}>
 								<td>
 									<Checkbox
 										checked={selectedRows.includes(element.id)}

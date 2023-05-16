@@ -6,41 +6,28 @@ import api from '@/lib/axios';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/router';
 import { IconArrowBack } from '@tabler/icons-react';
+import { getCookie } from 'cookies-next';
 
-const CreateItem = () => {
+export async function getServerSideProps(context) {
+	const { id } = context.query;
+	const response = await api.get(`item/${id}/show`, {
+		headers: {
+			Authorization: getCookie('authorization'),
+		},
+	});
+
+	const item = response.data;
+
+	return { props: { item } };
+}
+
+const ShowItem = ({ item }) => {
 	const router = useRouter();
 
-	const [qtyItem, setQtyItem] = useState('');
-	const [partName, setPartName] = useState('');
-	const [partNumber, setPartNumber] = useState('');
-	const [picture, setPicture] = useState('');
-
-	const handleSubmit = async () => {
-		try {
-			await api.post('item/create', {
-				qty: qtyItem,
-				partName,
-				partNumber,
-				picture,
-			});
-			notifications.show({
-				title: 'Success',
-				message: 'Your registration has been successfully submitted!',
-				color: 'teal',
-				icon: <CheckIcon />,
-				autoClose: 5000,
-			});
-			router.push('/admin/table/simple');
-		} catch (error) {
-			notifications.show({
-				title: 'Error',
-				message: 'Failed to submit your registration. Please try again later.',
-				color: 'red',
-				// icon: <CloseIcon />,
-				autoClose: 5000,
-			});
-		}
-	};
+	const [qtyItem, setQtyItem] = useState(item.qty);
+	const [partName, setPartName] = useState(item.partName);
+	const [partNumber, setPartNumber] = useState(item.partNumber);
+	const [picture, setPicture] = useState(item.picture);
 
 	const back = () => {
 		router.push('/admin/table/simple');
@@ -80,6 +67,8 @@ const CreateItem = () => {
 						id="input-demo"
 						placeholder="Qty"
 						type="number"
+						value={qtyItem}
+						readOnly
 						onChange={e => setQtyItem(e.target.value)}
 					/>
 				</Input.Wrapper>
@@ -94,6 +83,8 @@ const CreateItem = () => {
 						variant="filled"
 						id="input-demo"
 						placeholder="Part Name"
+						value={partName}
+						readOnly
 						onChange={e => setPartName(e.target.value)}
 					/>
 				</Input.Wrapper>
@@ -108,20 +99,18 @@ const CreateItem = () => {
 						variant="filled"
 						id="input-demo"
 						placeholder="Part Number"
+						value={partNumber}
+						readOnly
 						onChange={e => setPartNumber(e.target.value)}
 					/>
 				</Input.Wrapper>
 			</Group>
 			<Space h="xl" />
-			<Button radius="md">Tambahkan Gambar</Button>
 			<Space h="xl" />
-			<Button style={{ float: 'right' }} onClick={handleSubmit}>
-				Submit
-			</Button>
 		</>
 	);
 };
 
-CreateItem.getLayout = page => <AdminLayout>{page}</AdminLayout>;
+ShowItem.getLayout = page => <AdminLayout>{page}</AdminLayout>;
 
-export default CreateItem;
+export default ShowItem;

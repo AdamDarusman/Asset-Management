@@ -41,10 +41,16 @@ const SignIn: NextPageWithLayout = () => {
 	// };
 
 	const handleSubmit = async () => {
-		const res = await api.post('/auth/login', {
-			email: email,
-			password: password,
-		});
+		const res = await api.post(
+			'/auth/login',
+			{
+				email: email,
+				password: password,
+			},
+			{
+				withCredentials: true,
+			}
+		);
 
 		console.log(res);
 		setCookie('authorization', `Bearer ${res.data.access_token}`, {

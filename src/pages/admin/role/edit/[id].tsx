@@ -26,7 +26,6 @@ export async function getServerSideProps(context) {
 }
 
 const UpdateRole = ({ role }) => {
-	console.log(role);
 
 	const [name, setName] = useState(role.name);
 	const [permissions, setPermissions] = useState([]);
@@ -42,9 +41,6 @@ const UpdateRole = ({ role }) => {
 				`http://localhost:8000/role/role-permission/${role.id}/show`
 			).then(res => res.json());
 			setSelectedPermission(permission.map(p => p.id));
-
-			console.log(permission.map(p => p.id));
-			console.log(selectedPermissions);
 		};
 		getDefaultPermission();
 	}, [role.id]);

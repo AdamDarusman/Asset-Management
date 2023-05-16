@@ -25,7 +25,6 @@ export const routes: NavItem[] = [
 		link: '/admin/table',
 		links: [{ label: 'Daftar Item', link: '/admin/table/simple' }],
 	},
-	{ label: 'Charts', icon: IconChartArcs, link: '/admin/chart' },
 	{
 		label: 'Manajement Machine',
 		icon: IconLock,

@@ -7,17 +7,25 @@ import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/router';
 import { IconArrowBack } from '@tabler/icons-react';
 
-const CreateItem = () => {
+export async function getServerSideProps(context) {
+	const { id } = context.query;
+	const response = await api.get(`/item/${id}/show`);
+	const item = response.data;
+
+	return { props: { item } };
+}
+
+const EditItem = ({ item }) => {
 	const router = useRouter();
 
-	const [qtyItem, setQtyItem] = useState('');
-	const [partName, setPartName] = useState('');
-	const [partNumber, setPartNumber] = useState('');
-	const [picture, setPicture] = useState('');
+	const [qtyItem, setQtyItem] = useState(item.qty);
+	const [partName, setPartName] = useState(item.partName);
+	const [partNumber, setPartNumber] = useState(item.partNumber);
+	const [picture, setPicture] = useState(item.picture);
 
-	const handleSubmit = async () => {
+	const handleUpdate = async id => {
 		try {
-			await api.post('item/create', {
+			const res = await api.patch(`/item/${id}/edit`, {
 				qty: qtyItem,
 				partName,
 				partNumber,
@@ -80,6 +88,7 @@ const CreateItem = () => {
 						id="input-demo"
 						placeholder="Qty"
 						type="number"
+						value={qtyItem}
 						onChange={e => setQtyItem(e.target.value)}
 					/>
 				</Input.Wrapper>
@@ -94,6 +103,7 @@ const CreateItem = () => {
 						variant="filled"
 						id="input-demo"
 						placeholder="Part Name"
+						value={partName}
 						onChange={e => setPartName(e.target.value)}
 					/>
 				</Input.Wrapper>
@@ -108,6 +118,7 @@ const CreateItem = () => {
 						variant="filled"
 						id="input-demo"
 						placeholder="Part Number"
+						value={partNumber}
 						onChange={e => setPartNumber(e.target.value)}
 					/>
 				</Input.Wrapper>
@@ -115,13 +126,13 @@ const CreateItem = () => {
 			<Space h="xl" />
 			<Button radius="md">Tambahkan Gambar</Button>
 			<Space h="xl" />
-			<Button style={{ float: 'right' }} onClick={handleSubmit}>
+			<Button style={{ float: 'right' }} onClick={() => handleUpdate(item.id)}>
 				Submit
 			</Button>
 		</>
 	);
 };
 
-CreateItem.getLayout = page => <AdminLayout>{page}</AdminLayout>;
+EditItem.getLayout = page => <AdminLayout>{page}</AdminLayout>;
 
-export default CreateItem;
+export default EditItem;

@@ -20,13 +20,20 @@ import { useRouter } from 'next/router';
 import { notifications } from '@mantine/notifications';
 import { IconHomeCancel } from '@tabler/icons-react';
 
-const CreateLabel = () => {
+export async function getServerSideProps(context) {
+	const { id } = context.query;
+	const label = await api.get(`label/${parseInt(id)}/show`);
+
+	return { props: { label: label.data } };
+}
+
+const EditLabel = ({ label }) => {
 	const router = useRouter();
 	const [searchValue, onSearchChange] = useState('');
 
-	const [kodeGi, setKodeGi] = useState('');
-	const [item, setItem] = useState('');
-	const [qty, setQty] = useState('');
+	const [kodeGi, setKodeGi] = useState(label.kodeGi);
+	const [item, setItem] = useState(label.item ? label.item.id : '');
+	const [qty, setQty] = useState(label.item.id);
 
 	const [items, setItems] = useState([]);
 	const itemOptions = items.map(item => ({ value: item.id, label: item.partNumber }));
@@ -39,11 +46,11 @@ const CreateLabel = () => {
 		getItems();
 	}, []);
 
-	const handleSubmit = async () => {
+	const handleUpdate = async labelId => {
 		console.log(item);
 
 		try {
-			await api.post('label/create', {
+			await api.patch(`label/${parseInt(labelId)}/edit`, {
 				kodeGi,
 				item: parseInt(item),
 				qty,
@@ -76,17 +83,20 @@ const CreateLabel = () => {
 					label="Masukan Kode GI"
 					withAsterisk
 					onChange={e => setKodeGi(e.target.value)}
+					value={kodeGi}
 				/>
 				<Space w="xl" />
 				{items && (
 					<Select
 						style={{ width: '250px' }}
+						// data={['React', 'Angular', 'Svelte', 'Vue', 'Riot', 'Next.js', 'Blitz.js']}
 						data={itemOptions}
 						label="Pilih Material"
 						placeholder="choose an item"
 						searchable
 						searchValue={searchValue}
 						onChange={itemOptions => setItem(itemOptions)}
+						value={item}
 						onSearchChange={onSearchChange}
 						nothingFound="Nothing found"
 					/>
@@ -94,23 +104,24 @@ const CreateLabel = () => {
 				<Space w="xl" />
 				<TextInput
 					style={{ width: '250px' }}
-					placeholder="Qty"
+					placeholder="Your name"
 					label="Masukan Qty Item Diterima"
 					withAsterisk
 					type="number"
-					readOnly
+					onChange={e => setQty(e.target.value)}
+					value={qty}
 				/>
 			</Group>
 			<Group style={{ marginTop: '400px' }} position="right">
 				<Button component="a" href="/admin/label/common" variant="outline">
 					Back
 				</Button>
-				<Button onClick={handleSubmit}>Submit</Button>
+				<Button onClick={() => handleUpdate(label.id)}>Submit</Button>
 			</Group>
 		</>
 	);
 };
 
-CreateLabel.getLayout = page => <AdminLayout>{page}</AdminLayout>;
+EditLabel.getLayout = page => <AdminLayout>{page}</AdminLayout>;
 
-export default CreateLabel;
+export default EditLabel;
