@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+/* eslint-disable no-mixed-operators */
+import React, { useEffect, useState } from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
-import { DatePickerInput } from '@mantine/dates';
-import { PageContainer } from '@/components/PageContainer';
 import {
 	ActionIcon,
 	Button,
 	Checkbox,
-	Container,
 	Divider,
 	Flex,
 	Group,
@@ -29,50 +27,147 @@ import {
 	IconSearch,
 	IconTrash,
 } from '@tabler/icons-react';
-import { DataTable } from 'mantine-datatable';
-import companies from './companies.json';
+import router from 'next/router';
+import { showNotification } from '@mantine/notifications';
+import api from '@/lib/axios';
 
 const SimpleTable: NextPageWithLayout = () => {
-	function printInfo(company: {
-		No: string;
-		NoLabel: string;
-		NoGl: string;
-		NamaMaterial: string;
-		DateCreated: string;
-		missionStatement: string;
-	}): void {
-		// throw new Error('Function not implemented.');
-	}
-
-	function deleteCompany(company: {
-		No: string;
-		NoLabel: string;
-		NoGl: string;
-		NamaMaterial: string;
-		DateCreated: string;
-		missionStatement: string;
-	}): void {
-		// throw new Error('Function not implemented.');
-	}
-	const [searchValue, onSearchChange] = useState('');
+	const [machines, setMachines] = useState([]);
+	const [showDeleteButton, setShowDeleteButton] = useState(false);
 
 	const [searchQuery, setSearchQuery] = useState('');
+	const [filteredMachines, setFilteredMachines] = useState([]);
+	const [isSearching, setIsSearching] = useState(false);
 
 	const handleSearchInputChange = event => {
-		setSearchQuery(event.target.value);
+		const query = event.target.value;
+		setSearchQuery(query);
+		setIsSearching(query !== ''); // Mengatur status isSearching berdasarkan apakah query kosong atau tidak
+		const filtered = machines.filter(item =>
+			item.name.toLowerCase().includes(query.toLowerCase())
+		);
+		setFilteredMachines(filtered);
 	};
 
-	const handleSearchClick = () => {
-		console.log(`Searching for "${searchQuery}"...`);
+	const machinesToDisplay = isSearching ? filteredMachines : machines;
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await api.get('/machine/show-all-machine', {
+					headers: {
+						'Cache-Control': 'no-cache',
+					},
+				});
+				setMachines(response.data);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+		fetchData();
+	}, []);
+
+	async function deleteUser(id) {
+		try {
+			await api.post(`/machine/${id}/delete`);
+			setMachines(prevmachines => prevmachines.filter(machine => machine.id !== id));
+			showNotification({
+				title: 'Berhasil!',
+				message: 'Data berhasil dihapus',
+				color: 'green',
+			});
+		} catch (error) {
+			showNotification({
+				title: 'Gagal!',
+				message: 'Terjadi kesalahan saat menghapus data',
+				color: 'red',
+			});
+		}
+	}
+
+	const [selectedRows, setSelectedRows] = useState<number[]>([]);
+	const [selectAll, setSelectAll] = useState(false);
+
+	useEffect(() => {
+		if (selectedRows.length > 0) {
+			setShowDeleteButton(true);
+		} else {
+			setShowDeleteButton(false);
+		}
+	}, [selectedRows]);
+
+	const handleDelete = () => {
+		setMachines(prevMachines =>
+			prevMachines.filter(machine => !selectedRows.includes(machine.id))
+		);
+		setSelectedRows([]);
+		setSelectAll(false);
 	};
 
-	const [value, setValue] = useState<Date | null>(null);
+	const ths = (
+		<tr>
+			<th>
+				<Checkbox
+					checked={selectAll}
+					onChange={e => {
+						setSelectAll(e.target.checked);
+						setSelectedRows(e.target.checked ? machines.map(machine => machine.id) : []);
+					}}
+				/>
+			</th>
+			<th>Nama</th>
+			<th>
+				{selectAll || selectedRows.length > 0 ? (
+					<Button color="red" onClick={handleDelete}>
+						Delete
+					</Button>
+				) : (
+					'Action'
+				)}
+			</th>
+		</tr>
+	);
+
+	//pagination
+	const [activePage, setActivePage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const totalmachines = machines.length;
+	const [machinesPerPage, setMachinesPerPage] = useState(5);
+	const startIndex = (activePage - 1) * machinesPerPage;
+	const endIndex = Math.min(startIndex + machinesPerPage - 1, totalmachines - 1);
+
+	useEffect(() => {
+		const newTotalPages = Math.ceil(machines.length / machinesPerPage);
+		if (newTotalPages !== totalPages) {
+			setActivePage(1);
+			setTotalPages(newTotalPages);
+		}
+		if (newTotalPages > 100) {
+			setTotalPages(100);
+		}
+	}, [machines, machinesPerPage, totalPages]);
+
+	const handlePageChange = newPage => {
+		setActivePage(newPage);
+	};
+
+	const handlemachinesPerPageChange = value => {
+		setMachinesPerPage(parseInt(value));
+	};
+
+	const show = id => {
+		router.push(`/admin/mesin/view/${id}`);
+	};
+
+	const editPg = id => {
+		router.push(`/admin/mesin/edit/${id}`);
+	};
 
 	return (
 		<>
 			<Group>
 				<TextInput
-					placeholder="Saerch"
+					placeholder="Search"
 					value={searchQuery}
 					onChange={handleSearchInputChange}
 					label="Search"
@@ -80,59 +175,89 @@ const SimpleTable: NextPageWithLayout = () => {
 					icon={<IconSearch size={18} />}
 				/>
 				<MultiSelect
-					data={['React', 'Angular', 'Svelte', 'Vue', 'Riot', 'Next.js', 'Blitz.js']}
+					data={['React', 'Blitz.js']}
 					label="Pilih Material"
 					placeholder="Pick all that you like"
-					searchable
-					searchValue={searchValue}
-					onSearchChange={onSearchChange}
+					// searchable
+					// searchValue={searchValue}
+					// onSearchChange={onSearchChange}
 					nothingFound="Nothing found"
 				/>
+				<Button
+					bottom={-13}
+					left={400}
+					component="a"
+					href="/admin/mesin/create"
+					rightIcon={<IconPlus />}
+				>
+					Tambah Baru
+				</Button>
 			</Group>
 			<Space h="xl" />
 			<Divider size="md" />
-			<DataTable
-				striped
-				highlightOnHover
-				columns={[
-					{
-						accessor: 'No',
-					},
-					{ accessor: 'NoLabel', title: 'No Label' },
-					{ accessor: 'NoGl', title: 'No Gl' },
-					{
-						accessor: 'actions',
-						title: 'Row Actions',
-						render: company => (
-							<Group spacing={4} style={{ marginLeft: '30px' }}>
-								<ActionIcon color="green" onClick={() => printInfo(company)}>
-									<IconScan size={16} />
-								</ActionIcon>
-								<ActionIcon
-									component="a"
-									href="/admin/mesin/view"
-									color="blue"
-									onClick={() => printInfo(company)}
-								>
-									<IconEye size={16} />
-								</ActionIcon>
-								<ActionIcon
-									component="a"
-									href="/admin/mesin/edit"
-									color="yellow"
-									onClick={() => printInfo(company)}
-								>
-									<IconEdit size={16} />
-								</ActionIcon>
-								<ActionIcon color="red" onClick={() => deleteCompany(company)}>
-									<IconTrash size={16} />
-								</ActionIcon>
-							</Group>
-						),
-					},
-				]}
-				records={companies}
-			/>
+			<Table captionSide="bottom" striped highlightOnHover>
+				<thead>{ths}</thead>
+				<tbody>
+					{machinesToDisplay.slice(startIndex, endIndex + 1).map((item, index) => (
+						<tr key={index}>
+							<td>
+								<Checkbox
+									checked={selectedRows.includes(item.id)}
+									onChange={e => {
+										setSelectedRows(prev =>
+											e.target.checked
+												? [...prev, item.id]
+												: prev.filter(id => id !== item.id)
+										);
+									}}
+								/>
+							</td>
+							<td> {item.name} </td>
+							<td>
+								{' '}
+								<Group>
+									<ActionIcon color="green" onClick={() => console.log('Edit:', item.id)}>
+										<IconScan size={16} />
+									</ActionIcon>
+									<ActionIcon component="a" color="blue" onClick={() => show(item.id)}>
+										<IconEye size={16} />
+									</ActionIcon>
+									<ActionIcon
+										color="yellow"
+										component="a"
+										onClick={() => editPg(item.id)}
+									>
+										<IconEdit size={16} />
+									</ActionIcon>
+									<ActionIcon color="red" onClick={() => deleteUser(item.id)}>
+										<IconTrash size={16} />
+									</ActionIcon>
+								</Group>{' '}
+							</td>
+							<td></td>
+						</tr>
+					))}
+				</tbody>
+			</Table>
+			<Space h="xl" />
+			<Space h="xl" />
+			<div style={{ display: 'flex', marginLeft: '20px' }}>
+				<div style={{ display: 'flex' }}>
+					<Select
+						maw={200}
+						placeholder="Select Number"
+						data={['5', '10', '20']}
+						onChange={handlemachinesPerPageChange}
+					/>
+					<Pagination
+						style={{ marginLeft: '150px' }}
+						totalPages={totalPages}
+						activePage={activePage}
+						onChange={handlePageChange}
+						total={totalPages}
+					/>
+				</div>
+			</div>
 		</>
 	);
 };

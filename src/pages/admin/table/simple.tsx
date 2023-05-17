@@ -55,10 +55,10 @@ const ItemList = () => {
 	//pagination
 	const [activePage, setActivePage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
-	const totalItems = items.length;
-	const [itemsPerPage, setItemsPerPage] = useState(5);
+	const totalitems = items.length;
+	const [itemsPerPage, setitemsPerPage] = useState(5);
 	const startIndex = (activePage - 1) * itemsPerPage;
-	const endIndex = Math.min(startIndex + itemsPerPage - 1, totalItems - 1);
+	const endIndex = Math.min(startIndex + itemsPerPage - 1, totalitems - 1);
 
 	useEffect(() => {
 		const newTotalPages = Math.ceil(items.length / itemsPerPage);
@@ -75,8 +75,8 @@ const ItemList = () => {
 		setActivePage(newPage);
 	};
 
-	const handleItemsPerPageChange = value => {
-		setItemsPerPage(parseInt(value));
+	const handleitemsPerPageChange = value => {
+		setitemsPerPage(parseInt(value));
 	};
 
 	const createPg = () => {
@@ -183,23 +183,22 @@ const ItemList = () => {
 			</PageContainer>
 			<Space h="xl" />
 			<Space h="xl" />
-			<div style={{ display: 'flex' }}>
-				<Select
-					maw={200}
-					placeholder="Select Number"
-					data={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
-				/>
-				<Space w="xl" />
-				<Space w="xl" />
-				<Space w="xl" />
-
-				<Pagination
-					style={{ marginLeft: '150px' }}
-					totalPages={totalPages}
-					activePage={activePage}
-					onChange={handlePageChange}
-					total={totalPages}
-				/>
+			<div style={{ display: 'flex', marginLeft: '20px' }}>
+				<div style={{ display: 'flex' }}>
+					<Select
+						maw={200}
+						placeholder="Select Number"
+						data={['5', '10', '20']}
+						onChange={handleitemsPerPageChange}
+					/>
+					<Pagination
+						style={{ marginLeft: '150px' }}
+						totalPages={totalPages}
+						activePage={activePage}
+						onChange={handlePageChange}
+						total={totalPages}
+					/>
+				</div>
 			</div>
 		</>
 	);

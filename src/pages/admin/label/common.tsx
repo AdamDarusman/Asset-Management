@@ -38,7 +38,6 @@ const LabelList = () => {
 	const [labels, setLabels] = useState([]);
 
 	const router = useRouter();
-	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedRows, setSelectedRows] = useState<number[]>([]);
 	const [selectAll, setSelectAll] = useState(false);
 
@@ -50,13 +49,21 @@ const LabelList = () => {
 		getLabels();
 	}, []);
 
+	const [searchQuery, setSearchQuery] = useState('');
+	const [filteredLabels, setFilteredLabels] = useState([]);
+	const [isSearching, setIsSearching] = useState(false);
+
 	const handleSearchInputChange = event => {
-		setSearchQuery(event.target.value);
+		const query = event.target.value;
+		setSearchQuery(query);
+		setIsSearching(query !== ''); // Mengatur status isSearching berdasarkan apakah query kosong atau tidak
+		const filtered = labels.filter(label =>
+			label.noLabel.toLowerCase().includes(query.toLowerCase())
+		);
+		setFilteredLabels(filtered);
 	};
 
-	const handleSearchClick = () => {
-		console.log(`Searching for "${searchQuery}"...`);
-	};
+	const machinesToDisplay = isSearching ? filteredLabels : labels;
 
 	const [value, setValue] = useState<Date | null>(null);
 
@@ -135,7 +142,7 @@ const LabelList = () => {
 		<>
 			<Group>
 				<TextInput
-					placeholder="Saerch"
+					placeholder="Search"
 					value={searchQuery}
 					onChange={handleSearchInputChange}
 					label="Search"
@@ -165,7 +172,7 @@ const LabelList = () => {
 			<Table captionSide="bottom" striped highlightOnHover>
 				<thead>{ths}</thead>
 				<tbody>
-					{labels.slice(startIndex, endIndex + 1).map((label, index) => (
+					{machinesToDisplay.slice(startIndex, endIndex + 1).map((label, index) => (
 						<tr key={label.id}>
 							<td>
 								<Checkbox

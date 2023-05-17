@@ -28,7 +28,6 @@ export const mockNested: NavItem[] = [
 			{ label: 'Pagination', link: '/admin/table/pagination' },
 		],
 	},
-	{ label: 'Charts', icon: IconChartArcs, link: '/admin/chart' },
 	{
 		label: 'Authenication',
 		icon: IconLock,
@@ -42,7 +41,6 @@ export const mockNested: NavItem[] = [
 
 export const mockSimple: NavItem[] = [
 	{ label: 'Dashboard', icon: IconDashboard },
-	{ label: 'Charts', icon: IconChartArcs },
 	{ label: 'Icons', icon: IconIcons },
 	{ label: 'Settings', icon: IconSettings2 },
 ];
