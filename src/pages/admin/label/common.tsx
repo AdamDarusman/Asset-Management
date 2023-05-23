@@ -27,8 +27,6 @@ import {
 	IconSearch,
 	IconTrash,
 } from '@tabler/icons-react';
-import { DataTable } from 'mantine-datatable';
-import companies from './companies.json';
 import { useRouter } from 'next/router';
 import api from '@/lib/axios';
 import { IconEye } from '@tabler/icons-react';
@@ -36,34 +34,58 @@ import { showNotification } from '@mantine/notifications';
 
 const LabelList = () => {
 	const [labels, setLabels] = useState([]);
-
-	const router = useRouter();
 	const [selectedRows, setSelectedRows] = useState<number[]>([]);
 	const [selectAll, setSelectAll] = useState(false);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [filteredLabels, setFilteredLabels] = useState([]);
+	const [isSearching, setIsSearching] = useState(false);
+	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+	const router = useRouter();
 
 	useEffect(() => {
 		const getLabels = async () => {
 			const res = await api.get('label/show-all');
 			setLabels(res.data);
+			filterLabels(res.data, searchQuery, selectedDate);
 		};
 		getLabels();
 	}, []);
 
-	const [searchQuery, setSearchQuery] = useState('');
-	const [filteredLabels, setFilteredLabels] = useState([]);
-	const [isSearching, setIsSearching] = useState(false);
-
 	const handleSearchInputChange = event => {
 		const query = event.target.value;
 		setSearchQuery(query);
-		setIsSearching(query !== ''); // Mengatur status isSearching berdasarkan apakah query kosong atau tidak
-		const filtered = labels.filter(label =>
-			label.noLabel.toLowerCase().includes(query.toLowerCase())
+		setIsSearching(query !== '');
+
+		if (query !== '') {
+			const filtered = labels.filter(label =>
+				label.noLabel.toLowerCase().includes(query.toLowerCase())
+			);
+			filterLabels(filtered, '', selectedDate);
+		} else {
+			filterLabels(labels, '', selectedDate);
+		}
+	};
+
+	const handleDateChange = (date: Date | null) => {
+		setSelectedDate(date);
+		filterLabels(labels, searchQuery, date);
+	};
+
+	const filterLabels = (labels, query, date) => {
+		const formattedDate = date ? format(date, 'dd/MM/yyyy') : '';
+		const filtered = labels.filter(
+			label =>
+				label.noLabel.toLowerCase().includes(query.toLowerCase()) &&
+				(formattedDate === '' ||
+					format(new Date(label.createdAt), 'dd/MM/yyyy') === formattedDate)
 		);
 		setFilteredLabels(filtered);
 	};
 
-	const machinesToDisplay = isSearching ? filteredLabels : labels;
+	// Rest of the code...
+
+	const mergedLabels = isSearching ? filteredLabels : labels;
 
 	const [value, setValue] = useState<Date | null>(null);
 
@@ -138,6 +160,7 @@ const LabelList = () => {
 			});
 		}
 	};
+
 	return (
 		<>
 			<Group>
@@ -155,6 +178,8 @@ const LabelList = () => {
 					clearable
 					label="Pick date"
 					placeholder="Pick date"
+					value={selectedDate}
+					onChange={handleDateChange}
 				/>
 				<Button
 					component="a"
@@ -172,7 +197,7 @@ const LabelList = () => {
 			<Table captionSide="bottom" striped highlightOnHover>
 				<thead>{ths}</thead>
 				<tbody>
-					{machinesToDisplay.slice(startIndex, endIndex + 1).map((label, index) => (
+					{mergedLabels.slice(startIndex, endIndex + 1).map((label, index) => (
 						<tr key={label.id}>
 							<td>
 								<Checkbox
