@@ -144,7 +144,12 @@ const UserTable: NextPageWithLayout = () => {
 								</td>
 								<td>
 									<Group style={{ height: '50px' }}>
-										<Avatar size={'md'} radius="xl" style={{ marginBottom: '5px' }} />
+										<Avatar
+											size={'md'}
+											radius="xl"
+											src={`http://localhost:8000/api/pictures/${element.picture}`}
+											style={{ marginBottom: '5px' }}
+										/>
 										<div style={{ marginTop: '-10px' }}>
 											<p
 												style={{

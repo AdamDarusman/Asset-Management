@@ -30,6 +30,8 @@ const SimpleTable: NextPageWithLayout = () => {
 	const router = useRouter();
 	const [roles, setRoles] = useState([]);
 
+	const [previewImage, setPreviewImage] = useState(null);
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -42,17 +44,31 @@ const SimpleTable: NextPageWithLayout = () => {
 		fetchData();
 	}, []);
 
+	const handlePictureChange = e => {
+		const file = e.target.files[0];
+		setPicture(file);
+
+		if (file) {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setPreviewImage(reader.result)
+			}
+			reader.readAsDataURL(file)
+		}
+	};
+
 	async function handleSubmit() {
 		try {
-			await api.post('/api/register', {
-				name,
-				email,
-				password,
-				nip,
-				contactNumber,
-				picture,
-				roleId: selectedRole,
-			});
+			const formData = new FormData();
+			formData.append('file', picture);
+			formData.append('name', name);
+			formData.append('email', email);
+			formData.append('password', password);
+			formData.append('nip', nip);
+			formData.append('contactNumber', contactNumber);
+			formData.append('roleId', selectedRole);
+
+			await api.post('/api/register', formData);
 			notifications.show({
 				title: 'Success',
 				message: 'Your registration has been successfully submitted!',
@@ -81,12 +97,47 @@ const SimpleTable: NextPageWithLayout = () => {
 
 	return (
 		<>
-			<Group position="center">
+			{/* <Group position="center">
 				<Image maw={120} mx="auto" radius="md" src="/user.png" alt="Random image" />
 			</Group>
 			<Space h="md" />
 			<Group position="center">
-				<Button>Add Picture</Button>
+				<Button>
+					<input type="file" accept="image/*" onChange={handlePictureChange} />
+				</Button>
+			</Group> */}
+
+			<Group position="center">
+				{
+					previewImage ? (
+						<Image maw={120} mx="auto" radius="md" src={previewImage} />
+					) : (
+						<Image maw={120} mx="auto" radius="md" src="/user.png" alt="Random image" />
+					)
+				}
+			</Group>
+			<Space h="md" />
+			<Group position="center">
+				<input
+					type="file"
+					accept="image/*"
+					onChange={handlePictureChange}
+					id="fileInput"
+					style={{ display: 'none' }}
+				/>
+				<label htmlFor="fileInput">
+					<div
+						style={{
+							background: 'blue',
+							padding: '7px',
+							borderRadius: '3px',
+							cursor: 'pointer',
+							color: 'white',
+						}}
+					>
+						Add Picture
+					</div>
+				</label>
 			</Group>
 			<Input.Wrapper id="input-demo" withAsterisk label="Name">
 				<Input
