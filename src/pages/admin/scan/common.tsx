@@ -47,6 +47,11 @@ const SimpleTable: NextPageWithLayout = () => {
 						store: 1,
 					});
 					setStoreScanSuccess(true);
+					console.log(label.id);
+
+					await api.patch(`label/${label.id}/edit`, {
+						isScanned: '1',
+					});
 				} catch (error) {}
 			};
 			getItem(label);
@@ -59,11 +64,14 @@ const SimpleTable: NextPageWithLayout = () => {
 				try {
 					const res = await api.get(`label/${code}`);
 					setLabel(res.data);
-					setScanSuccess(true);
-					setScanFailed(false);
+					if (res.data.isScanned === 0) {
+						setScanSuccess(true);
+						setScanFailed(false);
+					} else {
+						setScanFailed(true);
+						setScanSuccess(false);
+					}
 				} catch (error) {
-					setScanFailed(true);
-					setScanSuccess(false);
 					// return 'Failed to scan label';
 				}
 			};
