@@ -50,7 +50,7 @@ const LabelList = () => {
 			filterLabels(res.data, searchQuery, selectedDate);
 		};
 		getLabels();
-	}, []);
+	}, [selectedDate, searchQuery]);
 
 	const handleSearchInputChange = event => {
 		const query = event.target.value;

@@ -32,7 +32,12 @@ const SimpleTable: NextPageWithLayout = () => {
 		if (selectedRadio === 'Masuk') {
 			return (
 				<>
-					<Group>
+					<Button color="gray" radius="md" style={{ width: '100%', marginTop: '10px' }}>
+						<p style={{ marginRight: '1000px', color: 'black', fontSize: '15px' }}>
+							QR CODE
+						</p>
+					</Button>
+					{/* <Group>
 						<p style={{ fontSize: '15px' }}>Scan Your QR CODE Here</p>
 						<Badge
 							color="green"
@@ -59,7 +64,7 @@ const SimpleTable: NextPageWithLayout = () => {
 						<p style={{ marginTop: '-5px' }}>Nama Item :</p>
 						<p style={{ marginTop: '-30px' }}>No GI :</p>
 						<p style={{ marginTop: '-30px' }}>Lokasi Rak :</p>
-					</Stack>
+					</Stack> */}
 				</>
 			);
 		} else if (selectedRadio === 'Keluar') {

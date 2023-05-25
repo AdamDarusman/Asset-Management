@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable no-mixed-operators */
+import React, { useEffect, useMemo, useState } from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { DatePickerInput } from '@mantine/dates';
 import { PageContainer } from '@/components/PageContainer';
 import {
-	ActionIcon,
-	Button,
-	Checkbox,
-	Container,
 	Divider,
 	Flex,
 	Group,
@@ -28,13 +25,25 @@ import { format } from 'date-fns';
 const StockItem = () => {
 	const [searchValue, onSearchChange] = useState('');
 	const [searchQuery, setSearchQuery] = useState('');
+	const [isSearching, setIsSearching] = useState(false);
+	const [filteredMachines, setFilteredMachines] = useState([]);
 	const [items, setItems] = useState([]);
+	const [selectedStatus, setSelectedStatus] = useState([]);
+	const [filteredByStatus, setFilteredByStatus] = useState([]);
+	const [startDate, setStartDate] = useState(null);
+	const [endDate, setEndDate] = useState(null);
 
 	const handleSearchInputChange = event => {
-		setSearchQuery(event.target.value);
+		const query = event.target.value;
+		setSearchQuery(query);
+		setIsSearching(query !== '');
+		const filtered = items.filter(item =>
+			item.partName.toLowerCase().includes(query.toLowerCase())
+		);
+		setFilteredMachines(filtered);
 	};
 
-	const itemNumberOptions = items.map(item => ({
+	const statusOptions = items.map(item => ({
 		value: item.partNumber,
 		label: item.partNumber,
 	}));
@@ -47,8 +56,31 @@ const StockItem = () => {
 		getItems();
 	}, []);
 
-	// Filter the items based on the "Item Number" field
-	const filteredItems = items.filter(item => item.partName.includes(searchQuery));
+	const filteredItems = useMemo(() => {
+		let filtered = isSearching
+			? filteredMachines
+			: selectedStatus.length > 0
+			? filteredByStatus
+			: items;
+
+		if (startDate && endDate) {
+			filtered = filtered.filter(item => {
+				const createdAtDate = new Date(item.createdAt);
+				return createdAtDate >= startDate && createdAtDate <= endDate;
+			});
+		}
+
+		return filtered;
+	}, [
+		isSearching,
+		filteredMachines,
+		selectedStatus,
+		filteredByStatus,
+		items,
+		startDate,
+		endDate,
+	]);
+
 	const partNumberFilter = items.filter(item => item.partNumber.includes(searchValue));
 
 	const ths = (
@@ -61,7 +93,6 @@ const StockItem = () => {
 		</tr>
 	);
 
-	// Pagination
 	const [activePage, setActivePage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const totalItems = filteredItems.length;
@@ -88,6 +119,12 @@ const StockItem = () => {
 		setItemsPerPage(parseInt(value));
 	};
 
+	const handleStatusChange = selectedOptions => {
+		setSelectedStatus(selectedOptions);
+		const filtered = items.filter(item => selectedOptions.includes(item.partNumber));
+		setFilteredByStatus(filtered);
+	};
+
 	return (
 		<>
 			<Group>
@@ -100,13 +137,14 @@ const StockItem = () => {
 					icon={<IconSearch size={18} />}
 				/>
 				<Select
-					label="Pilih Item"
-					placeholder="Part Number"
+					label="Status"
 					searchable
 					withAsterisk
-					nothingFound="No options"
-					onChange={itemNumberOptions => onSearchChange(itemNumberOptions)}
-					data={itemNumberOptions}
+					placeholder="Choose Status"
+					nothingFound="Nothing found"
+					value={selectedStatus}
+					onChange={handleStatusChange}
+					data={statusOptions}
 				/>
 				<DatePickerInput
 					style={{ width: '200px' }}
@@ -114,6 +152,8 @@ const StockItem = () => {
 					clearable
 					label="Start date"
 					placeholder="Pick date"
+					value={startDate}
+					onChange={date => setStartDate(date)}
 				/>
 				<DatePickerInput
 					style={{ width: '200px' }}
@@ -121,6 +161,8 @@ const StockItem = () => {
 					clearable
 					label="End date"
 					placeholder="Pick date"
+					value={endDate}
+					onChange={date => setEndDate(date)}
 				/>
 			</Group>
 			<Space h="xl" />
