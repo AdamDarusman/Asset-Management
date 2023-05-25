@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import {
@@ -32,6 +32,7 @@ const SimpleTable: NextPageWithLayout = () => {
 	const [item, setItem] = useState<any>([]);
 	const [scanSuccess, setScanSuccess] = useState(false);
 	const [scanFailed, setScanFailed] = useState(false);
+	const [storeScanSuccess, setStoreScanSuccess] = useState(false);
 
 	useEffect(() => {
 		if (scanSuccess) {
@@ -40,17 +41,17 @@ const SimpleTable: NextPageWithLayout = () => {
 					`item/${label.item ? parseInt(label.item.id) : ''}/show`
 				);
 				setItem(res.data);
-				sendStore();
+				try {
+					await api.post('store-product/create', {
+						item: parseInt(res.data.id),
+						store: 1,
+					});
+					setStoreScanSuccess(true);
+				} catch (error) {}
 			};
 			getItem(label);
 		}
-	}, [label]);
-
-	const sendStore = async () => {
-		await api.post('store-product/create', {
-			item,
-		});
-	};
+	}, [scanSuccess]);
 
 	useEffect(() => {
 		if (code) {
@@ -63,17 +64,20 @@ const SimpleTable: NextPageWithLayout = () => {
 				} catch (error) {
 					setScanFailed(true);
 					setScanSuccess(false);
-					return 'Failed to scan label';
+					// return 'Failed to scan label';
 				}
 			};
 			searchLabel(code);
 		}
 	}, [code]);
 
+	const timeoutRef = useRef(null);
 	const handleInputChange = e => {
-		setTimeout(() => {
+		clearTimeout(timeoutRef.current);
+
+		timeoutRef.current = setTimeout(() => {
 			setCode(e.target.value);
-		}, 1000);
+		}, 2500);
 	};
 
 	function selectInput() {
@@ -110,6 +114,7 @@ const SimpleTable: NextPageWithLayout = () => {
 								placeholder="QR CODE"
 								miw="1000px"
 								icon={<IconQrcode size="0.8rem" />}
+								disabled={storeScanSuccess}
 								onChange={handleInputChange}
 							/>
 						</Input.Wrapper>
