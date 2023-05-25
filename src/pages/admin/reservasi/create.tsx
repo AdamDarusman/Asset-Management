@@ -1,97 +1,234 @@
-import React from 'react';
+/* eslint-disable no-mixed-operators */
+import React, { useEffect, useState } from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
+import { PageContainer } from '@/components/PageContainer';
 import {
+	ActionIcon,
 	Button,
-	Group,
-	Image,
-	Space,
-	Text,
-	Input,
-	PasswordInput,
+	CheckIcon,
+	Checkbox,
 	Divider,
+	Group,
+	Input,
+	Pagination,
+	Select,
+	Space,
+	Table,
 } from '@mantine/core';
+import { IconEdit, IconEye, IconPlus, IconTrash } from '@tabler/icons-react';
+import { DataTable } from 'mantine-datatable';
+import companies from './companies.json';
+import api from '@/lib/axios';
+import { notifications } from '@mantine/notifications';
+import router from 'next/router';
 
 const SimpleTable: NextPageWithLayout = () => {
-	function showInfo(company: {
-		id: string;
-		User: string;
-		Role: string;
-		NIP: string;
-		ContactNumber: string;
-		missionStatement: string;
-	}): void {
-		// throw new Error('Function not implemented.');
+	const [reservasis, setReservasis] = useState([]);
+	const [activePage, setActivePage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const totalItems = reservasis.length;
+	const [itemsPerPage, setItemsPerPage] = useState(5);
+	const startIndex = (activePage - 1) * itemsPerPage;
+	const endIndex = Math.min(startIndex + itemsPerPage - 1, totalItems - 1);
+	const [selectedItem, setSelectedItem] = useState('');
+	const [items, setItems] = useState([]);
+	const [selectedMachine, setSelectedMachine] = useState('');
+	const [machines, setMachines] = useState([]);
+	const [addedItems, setAddedItems] = useState([]);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await api.get('/item/show-all');
+				setItems(response.data);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+		fetchData();
+	}, []);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await api.get('/machine/show-all-machine');
+				setMachines(response.data);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+		fetchData();
+	}, []);
+
+	const itemOptions = items.map(item => ({
+		value: item.id,
+		label: item.partName,
+	}));
+	const machineOptions = machines.map(machine => ({
+		value: machine.id,
+		label: machine.name,
+	}));
+
+	async function handleSubmit() {
+		try {
+			// Create an array of data objects to be submitted
+			const dataToSubmit = addedItems.map(item => ({
+				itemId: item.item,
+				machineId: item.machine,
+				qty: item.qty,
+			}));
+
+			// Make the API request to submit the data
+			await api.post('/reservasi/createMany', dataToSubmit);
+
+			// Clear the added items after successful submission
+			setAddedItems([]);
+
+			// Show success notification
+			notifications.show({
+				title: 'Success',
+				message: 'Your registration has been successfully submitted!',
+				color: 'teal',
+				icon: <CheckIcon />,
+				autoClose: 5000,
+			});
+		} catch (error) {
+			console.error(error);
+			notifications.show({
+				title: 'Error',
+				message: 'Failed to submit your registration. Please try again later.',
+				color: 'red',
+				autoClose: 5000,
+			});
+		}
 	}
 
-	function editInfo(company: {
-		id: string;
-		User: string;
-		Role: string;
-		NIP: string;
-		ContactNumber: string;
-		missionStatement: string;
-	}): void {
-		// throw new Error('Function not implemented.');
+	async function handleAdd() {
+		const qty = document.getElementById('input-demo').value;
+
+		const newItem = {
+			item: selectedItem,
+			machine: selectedMachine,
+			qty: qty,
+		};
+
+		setAddedItems(prevItems => [...prevItems, newItem]);
 	}
 
-	function deleteCompany(company: {
-		id: string;
-		User: string;
-		Role: string;
-		NIP: string;
-		ContactNumber: string;
-		missionStatement: string;
-	}): void {
-		// throw new Error('Function not implemented.');
-	}
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await api.get('/reservasi/show-all-reservasi', {
+					headers: {
+						'Cache-Control': 'no-cache',
+					},
+				});
+				setReservasis(response.data);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+		fetchData();
+	}, []);
+
+	const ths = (
+		<tr>
+			<th>No</th>
+			<th>Nama Item</th>
+			<th>Machine Name</th>
+			<th>Qty</th>
+			<th>Action</th>
+		</tr>
+	);
+	const [searchValue, onSearchChange] = useState('');
+
+	useEffect(() => {
+		const newTotalPages = Math.ceil(reservasis.length / itemsPerPage);
+		if (newTotalPages !== totalPages) {
+			setActivePage(1);
+			setTotalPages(newTotalPages);
+		}
+		if (newTotalPages > 100) {
+			setTotalPages(100);
+		}
+	}, [reservasis, itemsPerPage, totalPages]);
+
+	const handlePageChange = newPage => {
+		setActivePage(newPage);
+	};
+
+	const handleItemsPerPageChange = value => {
+		setItemsPerPage(parseInt(value));
+	};
 
 	return (
 		<>
-			<Group position="center">
-				<Image maw={120} mx="auto" radius="md" src="/user.png" alt="Random image" />
-			</Group>
-			<Space h="md" />
-			<Group position="center">
-				<Button>Add Picture</Button>
-			</Group>
-			<Input.Wrapper id="input-demo" withAsterisk label="Name">
-				<Input variant="filled" id="input-demo" placeholder="Your name" />
-			</Input.Wrapper>
-			<Input.Wrapper id="input-demo" withAsterisk label="Email">
-				<Input variant="filled" id="input-demo" placeholder="Your email" />
-			</Input.Wrapper>
-			<PasswordInput
-				placeholder="Password"
-				label="Password"
-				variant="filled"
-				withAsterisk
-			/>
-			<Input.Wrapper id="input-demo" withAsterisk label="Roles">
-				<Input required variant="filled" id="input-demo" placeholder="Role" />
-			</Input.Wrapper>
-			<Space h="md" />
-			<Text fz="sm" fw={500}>
-				General identity
-			</Text>
-			<Divider size="sm" />
-			<Space h="md" />
+			<h3>BUAT RESERVASI BARU</h3>
+			<Space h="xl" />
+			<h3>PENAMBAHAN ITEM</h3>
+			<Divider size="md" />
 			<Group>
-				<Input.Wrapper id="input-demo" withAsterisk label="Name">
-					<Input required variant="filled" id="input-demo" placeholder="Your name" />
+				{items && (
+					<Select
+						label="Pilih Item"
+						placeholder="Pick one"
+						searchable
+						nothingFound="No options"
+						data={itemOptions}
+						onSearchChange={itemOptions => setSelectedItem(itemOptions)}
+						style={{ marginTop: '30px' }}
+					/>
+				)}
+				<Space w="xl" />
+				<Select
+					label="Pilih Mesin"
+					placeholder="Pick one"
+					searchable
+					nothingFound="No options"
+					data={machineOptions}
+					onSearchChange={machineOptions => setSelectedMachine(machineOptions)}
+					style={{ marginTop: '30px' }}
+				/>
+				<Space w="xl" />
+				<Input.Wrapper
+					id="input-demo"
+					withAsterisk
+					label="Masukan Qty"
+					style={{ marginTop: '30px' }}
+				>
+					<Input required id="input-demo" placeholder="Masukan Qty" />
 				</Input.Wrapper>
 				<Space w="xl" />
-				<Input.Wrapper id="input-demo" withAsterisk label="Email">
-					<Input required variant="filled" id="input-demo" placeholder="Your email" />
-				</Input.Wrapper>
-			</Group>
-			<Space h="xl" />
-			<Group position="right">
-				<Button component="a" href="/admin/form/common" variant="outline">
-					Back
+				<Button color="green" style={{ marginTop: '52px' }} onClick={handleAdd}>
+					Add
 				</Button>
-				<Button>Save</Button>
 			</Group>
+			<h3>DAFTAR ITEM</h3>
+			<Divider size="md" />
+			<Table captionSide="bottom" striped highlightOnHover>
+				<thead>{ths}</thead>
+				<tbody>
+					{addedItems.map((reservasi, index) => (
+						<tr key={index}>
+							<td>{index + 1}</td>
+							<td>{reservasi.item}</td>
+							<td>{reservasi.machine}</td>
+							<td>{reservasi.qty}</td>
+							<td>
+								<Group>
+									<ActionIcon color="red">
+										<IconTrash size={16} />
+									</ActionIcon>
+								</Group>
+							</td>
+						</tr>
+					))}
+				</tbody>
+			</Table>
+			<Button onClick={handleSubmit} style={{ marginLeft: '93%', marginTop: '5px' }}>
+				Save
+			</Button>
 		</>
 	);
 };
