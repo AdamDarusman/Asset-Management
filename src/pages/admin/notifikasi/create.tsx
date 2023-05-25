@@ -15,6 +15,7 @@ import {
 	Radio,
 	Select,
 	Checkbox,
+	Table,
 } from '@mantine/core';
 import { useId } from '@mantine/hooks';
 import { IMaskInput } from 'react-imask';
@@ -31,8 +32,9 @@ const SimpleTable: NextPageWithLayout = () => {
 				<>
 					<Select
 						style={{ width: '300px' }}
-						label="Chooise Identify"
+						label="Chooise Customer"
 						placeholder="Pick one"
+						required
 						data={[
 							{ value: 'react', label: 'React' },
 							{ value: 'ng', label: 'Angular' },
@@ -43,17 +45,25 @@ const SimpleTable: NextPageWithLayout = () => {
 					<Select
 						style={{ width: '300px' }}
 						label="Chooise Dicvision"
+						required
 						placeholder="Pick one"
 						data={[
 							{ value: 'PPIC', label: 'PPIC' },
 							{ value: 'Accounting', label: 'Accounting' },
 						]}
 					/>
-					<Input.Wrapper id={id} style={{ width: '300px' }} label="Contact Number">
+					<Input.Wrapper
+						required
+						id={id}
+						style={{ width: '300px' }}
+						label="Contact Number"
+					>
 						<Input<any>
 							component={IMaskInput}
 							mask="+62 000-0000-0000"
 							id={id}
+							disabled
+							style={{ cursor: 'not-allowed' }}
 							placeholder="Input Your Contact"
 						/>
 					</Input.Wrapper>
@@ -65,6 +75,7 @@ const SimpleTable: NextPageWithLayout = () => {
 					<Select
 						style={{ width: '300px' }}
 						label="Chooise Identify"
+						required
 						placeholder="Pick one"
 						data={[
 							{ value: 'react', label: 'React' },
@@ -73,11 +84,18 @@ const SimpleTable: NextPageWithLayout = () => {
 							{ value: 'vue', label: 'Vue' },
 						]}
 					/>
-					<Input.Wrapper id={id} style={{ width: '300px' }} label="Contact Number">
+					<Input.Wrapper
+						required
+						id={id}
+						style={{ width: '300px' }}
+						label="Contact Number"
+					>
 						<Input<any>
 							component={IMaskInput}
 							mask="+62 000-0000-0000"
 							id={id}
+							disabled
+							style={{ cursor: 'not-allowed' }}
 							placeholder="Input Your Contact"
 						/>
 					</Input.Wrapper>
@@ -105,13 +123,13 @@ const SimpleTable: NextPageWithLayout = () => {
 						style={{ marginLeft: '50px', paddingBottom: '20px', marginTop: '-15px' }}
 						label="Incorrect Incoming Process"
 					/>
-					<Space h="md" />
+					<Space h="xs" />
 					<Checkbox
 						value="user"
 						style={{ marginLeft: '50px', paddingBottom: '20px', marginTop: '-15px' }}
 						label="Remminder Need to Finish DN"
 					/>
-					<Space h="md" />
+					<Space h="xs" />
 					<Checkbox
 						value="user"
 						style={{ marginLeft: '50px', paddingBottom: '20px', marginTop: '-15px' }}
@@ -135,17 +153,21 @@ const SimpleTable: NextPageWithLayout = () => {
 			<Space h="md" />
 			<Group>{selectInput()}</Group>
 			<Group>
-				<table
+				<Group
 					style={{
 						width: '100%',
 						border: 'gray 1px solid',
 						borderRadius: '10px',
 						marginTop: '20px',
+						display: 'flex',
+						flexDirection: 'column',
+						justifyContent: 'flex-start',
+						alignItems: 'flex-start',
 					}}
 				>
 					<h5 style={{ marginLeft: '50px' }}>Choose Type of Notifications *</h5>
 					{renderCheckboxes()}
-				</table>
+				</Group>
 			</Group>
 		</>
 	);

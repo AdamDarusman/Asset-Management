@@ -45,8 +45,6 @@ const SimpleTable: NextPageWithLayout = () => {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [filteredMachines, setFilteredMachines] = useState([]);
 	const [isSearching, setIsSearching] = useState(false);
-	const [filteredByStatus, setFilteredByStatus] = useState([]);
-	const [selectedStatus, setSelectedStatus] = useState([]);
 
 	const handleSearchInputChange = event => {
 		const query = event.target.value;
@@ -58,15 +56,7 @@ const SimpleTable: NextPageWithLayout = () => {
 		setFilteredMachines(filtered);
 	};
 
-	const filteredItems = useMemo(() => {
-		isSearching
-			? filteredMachines
-			: selectedStatus.length > 0
-			? filteredByStatus
-			: elements;
-	});
-
-	const [value, setValue] = useState<Date | null>(null);
+	const elementsToDisplay = isSearching ? filteredMachines : elements;
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -176,7 +166,7 @@ const SimpleTable: NextPageWithLayout = () => {
 			<Table captionSide="bottom" striped highlightOnHover>
 				<thead>{ths}</thead>
 				<tbody>
-					{elements.slice(startIndex, endIndex + 1).map((element, index) => (
+					{elementsToDisplay.slice(startIndex, endIndex + 1).map((element, index) => (
 						<tr key={element.key}>
 							<td> {element.role.name} </td>
 							<td> {element.nip} </td>

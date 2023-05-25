@@ -13,8 +13,6 @@ import {
 	TextInput,
 	MultiSelect,
 	Radio,
-	Select,
-	Checkbox,
 	Badge,
 	Stack,
 	ActionIcon,
@@ -33,6 +31,8 @@ const SimpleTable: NextPageWithLayout = () => {
 	const [scanSuccess, setScanSuccess] = useState(false);
 	const [scanFailed, setScanFailed] = useState(false);
 	const [storeScanSuccess, setStoreScanSuccess] = useState(false);
+	const [showSuccessBadge, setShowSuccessBadge] = useState(false);
+	const [showFailedBadge, setShowFailedBadge] = useState(false);
 
 	useEffect(() => {
 		if (scanSuccess) {
@@ -47,6 +47,10 @@ const SimpleTable: NextPageWithLayout = () => {
 						store: 1,
 					});
 					setStoreScanSuccess(true);
+					setShowSuccessBadge(true);
+					setTimeout(() => {
+						setShowSuccessBadge(false);
+					}, 2000);
 				} catch (error) {}
 			};
 			getItem(label);
@@ -61,10 +65,14 @@ const SimpleTable: NextPageWithLayout = () => {
 					setLabel(res.data);
 					setScanSuccess(true);
 					setScanFailed(false);
+					setShowFailedBadge(false);
 				} catch (error) {
 					setScanFailed(true);
 					setScanSuccess(false);
-					// return 'Failed to scan label';
+					setShowFailedBadge(true);
+					setTimeout(() => {
+						setShowFailedBadge(false);
+					}, 2000);
 				}
 			};
 			searchLabel(code);
@@ -86,7 +94,7 @@ const SimpleTable: NextPageWithLayout = () => {
 				<>
 					<Group my="20px" style={{ display: 'flex', flexDirection: 'column' }}>
 						<Input.Wrapper label="Scan your code here" size="15px">
-							{scanSuccess && (
+							{showSuccessBadge && (
 								<Badge
 									color="green"
 									size="xl"
@@ -98,7 +106,7 @@ const SimpleTable: NextPageWithLayout = () => {
 									Berhasil
 								</Badge>
 							)}
-							{scanFailed && (
+							{showFailedBadge && (
 								<Badge
 									color="red"
 									size="xl"
@@ -171,28 +179,28 @@ const SimpleTable: NextPageWithLayout = () => {
 			));
 
 			const styles = `
-			.success {
-				display: inline-block;
-				width: 10px;
-				height: 10px;
-				border-radius: 50%;
-				background-color: green;
-				margin-right: 5px;
-			}
+        .success {
+          display: inline-block;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: green;
+          margin-right: 5px;
+        }
 
-			.failure {
-				display: inline-block;
-				width: 10px;
-				height: 10px;
-				border-radius: 50%;
-				background-color: red;
-				margin-right: 5px;
-			}
+        .failure {
+          display: inline-block;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: red;
+          margin-right: 5px;
+        }
 
-			.status-text {
-				display: none;
-			}
-`;
+        .status-text {
+          display: none;
+        }
+      `;
 
 			return (
 				<>
@@ -234,7 +242,13 @@ const SimpleTable: NextPageWithLayout = () => {
 							variant="filled"
 							style={{ width: '100%', marginTop: '-20px' }}
 						>
-							<p style={{ marginRight: '1000px', color: 'black', fontSize: '15px' }}>
+							<p
+								style={{
+									marginRight: '1000px',
+									color: 'black',
+									fontSize: '15px',
+								}}
+							>
 								QR CODE
 							</p>
 						</Badge>
