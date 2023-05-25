@@ -25,8 +25,6 @@ export async function getServerSideProps(context) {
 }
 
 const UpdateUser = ({ user }) => {
-	console.log(user);
-
 	const [name, setName] = useState(user.name);
 	const [email, setEmail] = useState(user.email);
 	const [selectedRole, setSelectedRole] = useState(user.role ? user.role.id : '');
@@ -37,6 +35,8 @@ const UpdateUser = ({ user }) => {
 
 	const router = useRouter();
 	const [roles, setRoles] = useState([]);
+
+	const [previewImage, setPreviewImage] = useState(null);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -51,15 +51,15 @@ const UpdateUser = ({ user }) => {
 	}, []);
 
 	async function handleUpdate(id) {
-		await api.patch(`/api/${id}/edit`, {
-			name,
-			email,
-			password,
-			nip,
-			contactNumber,
-			picture,
-			roleId: selectedRole,
-		});
+		const formData = new FormData();
+		formData.append('file', picture);
+		formData.append('name', name);
+		formData.append('email', email);
+		formData.append('password', password);
+		formData.append('nip', nip);
+		formData.append('contactNumber', contactNumber);
+		formData.append('roleId', selectedRole);
+		await api.patch(`/api/${parseInt(id)}/edit`, formData);
 		router.push('/admin/form/common');
 	}
 
@@ -69,14 +69,66 @@ const UpdateUser = ({ user }) => {
 		setSelectedRole(e.value);
 	};
 
+	const handlePictureChange = e => {
+		const file = e.target.files[0];
+		setPicture(file);
+
+		if (file) {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setPreviewImage(reader.result);
+			};
+			reader.readAsDataURL(file);
+		}
+	};
+
 	return (
 		<>
 			<Group position="center">
-				<Image maw={120} mx="auto" radius="md" src="/user.png" alt="Random image" />
+				{previewImage ? (
+					<img
+						style={{
+							width: '150px',
+							height: '150px',
+							borderRadius: '50%',
+							objectFit: 'cover',
+						}}
+						src={previewImage}
+					/>
+				) : (
+					<img
+						style={{
+							width: '150px',
+							height: '150px',
+							borderRadius: '50%',
+							objectFit: 'cover',
+						}}
+						src={`http://localhost:8000/api/pictures/${picture}`}
+					/>
+				)}
 			</Group>
 			<Space h="md" />
 			<Group position="center">
-				<Button>Add Picture</Button>
+				<input
+					type="file"
+					accept="image/*"
+					onChange={handlePictureChange}
+					id="fileInput"
+					style={{ display: 'none' }}
+				/>
+				<label htmlFor="fileInput">
+					<div
+						style={{
+							background: 'blue',
+							padding: '7px',
+							borderRadius: '3px',
+							cursor: 'pointer',
+							color: 'white',
+						}}
+					>
+						Add Picture
+					</div>
+				</label>
 			</Group>
 			<Input.Wrapper id="input-demo" withAsterisk label="Name">
 				<Input

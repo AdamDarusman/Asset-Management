@@ -51,9 +51,9 @@ const SimpleTable: NextPageWithLayout = () => {
 		if (file) {
 			const reader = new FileReader();
 			reader.onloadend = () => {
-				setPreviewImage(reader.result)
-			}
-			reader.readAsDataURL(file)
+				setPreviewImage(reader.result);
+			};
+			reader.readAsDataURL(file);
 		}
 	};
 
@@ -108,13 +108,27 @@ const SimpleTable: NextPageWithLayout = () => {
 			</Group> */}
 
 			<Group position="center">
-				{
-					previewImage ? (
-						<Image maw={120} mx="auto" radius="md" src={previewImage} />
-					) : (
-						<Image maw={120} mx="auto" radius="md" src="/user.png" alt="Random image" />
-					)
-				}
+				{previewImage ? (
+					<img
+						style={{
+							width: '150px',
+							height: '150px',
+							borderRadius: '50%',
+							objectFit: 'cover',
+						}}
+						src={previewImage}
+					/>
+				) : (
+					<img
+						style={{
+							width: '150px',
+							height: '150px',
+							borderRadius: '50%',
+							objectFit: 'cover',
+						}}
+						src="/user.png"
+					/>
+				)}
 			</Group>
 			<Space h="md" />
 			<Group position="center">
@@ -128,11 +142,12 @@ const SimpleTable: NextPageWithLayout = () => {
 				<label htmlFor="fileInput">
 					<div
 						style={{
-							background: 'blue',
-							padding: '7px',
-							borderRadius: '3px',
+							background: '#2752da',
+							padding: '8px',
+							borderRadius: '4px',
 							cursor: 'pointer',
-							color: 'white',
+							color: '#fff9fc',
+							fontWeight: 'bold',
 						}}
 					>
 						Add Picture

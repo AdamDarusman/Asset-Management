@@ -161,6 +161,10 @@ const LabelList = () => {
 		}
 	};
 
+	const printQr = noLabel => {
+		window.open(`/admin/label/qrcode/${noLabel}`, '_blank');
+	};
+
 	return (
 		<>
 			<Group>
@@ -218,11 +222,8 @@ const LabelList = () => {
 							<td>
 								{' '}
 								<Group>
-									<ActionIcon
-										color="green"
-										onClick={() => console.log('Edit:', label.id)}
-									>
-										<IconScan size={16} />
+									<ActionIcon color="green">
+										<IconPrinter size={16} onClick={() => printQr(label.noLabel)} />
 									</ActionIcon>
 									<ActionIcon component="a" color="blue">
 										<IconEye size={16} onClick={() => showPg(label.id)} />

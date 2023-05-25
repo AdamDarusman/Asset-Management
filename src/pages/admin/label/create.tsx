@@ -31,6 +31,7 @@ const CreateLabel = () => {
 	const [items, setItems] = useState([]);
 	const itemOptions = items.map(item => ({ value: item.id, label: item.partNumber }));
 
+	const [noLabel, setNoLabel] = useState([]);
 	useEffect(() => {
 		const getItems = async () => {
 			const res = await api.get('item/show-all');
@@ -39,9 +40,19 @@ const CreateLabel = () => {
 		getItems();
 	}, []);
 
-	const handleSubmit = async () => {
-		console.log(item);
+	useEffect(() => {
+		const getNoLabel = async () => {
+			const res = await api.get('label/lastLabel');
+			setNoLabel(res.data);
+		};
+		getNoLabel();
+	}, []);
+	const createQr = () => {
+		const url = `/admin/label/qrcode/${noLabel}`;
+		window.open(url, '_blank');
+	};
 
+	const handleSubmit = async () => {
 		try {
 			await api.post('label/create', {
 				kodeGi,
@@ -55,11 +66,15 @@ const CreateLabel = () => {
 				icon: <CheckIcon />,
 				autoClose: 5000,
 			});
-			router.push('/admin/label/common');
+			createQr();
+			router.reload();
+			// router.push('/admin/label/common');
 		} catch (error) {
+			console.log('label', error);
+
 			notifications.show({
 				title: 'Error',
-				message: 'Failed to submit label.',
+				message: 'Duplicate data or qty not equal.',
 				color: 'red',
 				icon: <IconHomeCancel />,
 				autoClose: 5000,
@@ -98,7 +113,7 @@ const CreateLabel = () => {
 					label="Masukan Qty Item Diterima"
 					withAsterisk
 					type="number"
-					readOnly
+					onChange={e => setQty(e.target.value)}
 				/>
 			</Group>
 			<Group style={{ marginTop: '400px' }} position="right">

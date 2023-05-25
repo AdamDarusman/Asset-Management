@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import {
@@ -19,47 +19,108 @@ import {
 	Stack,
 	ActionIcon,
 	Table,
+	Paper,
 } from '@mantine/core';
 import { useId } from '@mantine/hooks';
+import { IconQrcode } from '@tabler/icons-react';
+import api from '@/lib/axios';
 
 const SimpleTable: NextPageWithLayout = () => {
-	const [searchValue, onSearchChange] = useState('');
 	const [selectedRadio, setSelectedRadio] = useState('Customer');
+	const [code, setCode] = useState('');
+	const [label, setLabel] = useState<any>([]);
+	const [item, setItem] = useState<any>([]);
+	const [scanSuccess, setScanSuccess] = useState(false);
+	const [scanFailed, setScanFailed] = useState(false);
 
-	const id = useId();
+	useEffect(() => {
+		if (scanSuccess) {
+			const getItem = async label => {
+				const res = await api.get(
+					`item/${label.item ? parseInt(label.item.id) : ''}/show`
+				);
+				setItem(res.data);
+				sendStore();
+			};
+			getItem(label);
+		}
+	}, [label]);
+
+	const sendStore = async () => {
+		await api.post('store-product/create', {
+			item,
+		});
+	};
+
+	useEffect(() => {
+		if (code) {
+			const searchLabel = async code => {
+				try {
+					const res = await api.get(`label/${code}`);
+					setLabel(res.data);
+					setScanSuccess(true);
+					setScanFailed(false);
+				} catch (error) {
+					setScanFailed(true);
+					setScanSuccess(false);
+					return 'Failed to scan label';
+				}
+			};
+			searchLabel(code);
+		}
+	}, [code]);
+
+	const handleInputChange = e => {
+		setTimeout(() => {
+			setCode(e.target.value);
+		}, 1000);
+	};
 
 	function selectInput() {
 		if (selectedRadio === 'Masuk') {
 			return (
 				<>
-					<Group>
-						<p style={{ fontSize: '15px' }}>Scan Your QR CODE Here</p>
-						<Badge
-							color="green"
-							size="xl"
-							radius="md"
-							variant="filled"
-							style={{ width: '200px' }}
-						>
-							Berhasil
-						</Badge>
+					<Group my="20px" style={{ display: 'flex', flexDirection: 'column' }}>
+						<Input.Wrapper label="Scan your code here" size="15px">
+							{scanSuccess && (
+								<Badge
+									color="green"
+									size="xl"
+									radius="md"
+									variant="filled"
+									mx="10px"
+									my="sm"
+								>
+									Berhasil
+								</Badge>
+							)}
+							{scanFailed && (
+								<Badge
+									color="red"
+									size="xl"
+									radius="md"
+									variant="filled"
+									mx="10px"
+									my="sm"
+								>
+									Failed
+								</Badge>
+							)}
+							<Input
+								placeholder="QR CODE"
+								miw="1000px"
+								icon={<IconQrcode size="0.8rem" />}
+								onChange={handleInputChange}
+							/>
+						</Input.Wrapper>
 					</Group>
-					<Badge
-						color="gray"
-						size="xl"
-						radius="md"
-						variant="filled"
-						style={{ width: '100%', marginTop: '-20px' }}
-					>
-						<p style={{ marginRight: '1000px', color: 'black', fontSize: '15px' }}>
-							QR CODE
-						</p>
-					</Badge>
-					<Stack>
-						<p style={{ marginTop: '-5px' }}>Nama Item :</p>
-						<p style={{ marginTop: '-30px' }}>No GI :</p>
-						<p style={{ marginTop: '-30px' }}>Lokasi Rak :</p>
-					</Stack>
+					{scanSuccess && (
+						<Stack>
+							<p style={{ marginTop: '-5px' }}>Nama Item : {item.partName}</p>
+							<p style={{ marginTop: '-30px' }}>No GI : {label.kodeGi}</p>
+							{/* <p style={{ marginTop: '-30px' }}>Lokasi Rak :</p> */}
+						</Stack>
+					)}
 				</>
 			);
 		} else if (selectedRadio === 'Keluar') {
