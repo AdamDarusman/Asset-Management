@@ -81,7 +81,12 @@ const SimpleTable: NextPageWithLayout = () => {
 						}, 2000);
 					}
 				} catch (error) {
-					// return 'Failed to scan label';
+					setScanFailed(true);
+					setScanSuccess(false);
+					setShowFailedBadge(true);
+					setTimeout(() => {
+						setShowFailedBadge(false);
+					}, 2000);
 				}
 			};
 			searchLabel(code);

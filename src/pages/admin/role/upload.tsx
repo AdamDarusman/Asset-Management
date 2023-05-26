@@ -92,7 +92,7 @@ const SimpleTable: NextPageWithLayout = () => {
 			<th>Role</th>
 			<th>
 				{selectAll || selectedRows.length > 0 ? (
-					<Button color="red" onClick={handleDelete}>
+					<Button color="red" onClick={deleteUser}>
 						Delete
 					</Button>
 				) : (

@@ -93,7 +93,7 @@ const SimpleTable: NextPageWithLayout = () => {
 
 	async function deleteUser(id) {
 		try {
-			await api.post(`/machine/${id}/delete`);
+			await api.post(`/reservasi/${id}/delete`);
 			setMachines(prevMachines => prevMachines.filter(machine => machine.id !== id));
 			showNotification({
 				title: 'Berhasil!',
