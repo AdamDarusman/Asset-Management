@@ -66,8 +66,9 @@ const SimpleTable: NextPageWithLayout = () => {
 	};
 
 	const statusOptions = [
-		{ label: '1', value: '1' },
-		{ label: '3', value: '3' },
+		{ label: 'Progress', value: '2' },
+		{ label: 'Requested', value: '1' },
+		{ label: 'Full Filled', value: '3' },
 	];
 
 	const machinesToDisplay = isSearching
@@ -199,12 +200,12 @@ const SimpleTable: NextPageWithLayout = () => {
 	const createPg = () => {
 		router.push(`/admin/reservasi/create`);
 	};
-	
+
 	useEffect(() => {
 		const getItem = async () => {
-			const res = await api.post(``)
-		}
-	})
+			const res = await api.post(``);
+		};
+	});
 
 	return (
 		<>
@@ -219,6 +220,7 @@ const SimpleTable: NextPageWithLayout = () => {
 				/>
 				<Select
 					label="Status"
+					searchable
 					placeholder="Choose Status"
 					nothingFound="Nothing found"
 					value={selectedStatus}
@@ -296,19 +298,19 @@ const SimpleTable: NextPageWithLayout = () => {
 								{item.status == 1 && (
 									<Badge style={{ color: 'red' }}>
 										{item.status == 1 && 'REQUESTED'} {item.status == 2 && 'PROGRESS'}{' '}
-										{item.status == 3 && 'PROGRESS'}
+										{item.status == 3 && 'FULLFILLED'}
 									</Badge>
 								)}
 								{item.status == 2 && (
 									<Badge style={{ color: 'blue' }}>
 										{item.status == 1 && 'REQUESTED'} {item.status == 2 && 'PROGRESS'}{' '}
-										{item.status == 3 && 'PROGRESS'}
+										{item.status == 3 && 'FULLFILLED'}
 									</Badge>
 								)}
 								{item.status == 3 && (
 									<Badge style={{ color: 'green' }}>
 										{item.status == 1 && 'REQUESTED'} {item.status == 2 && 'PROGRESS'}{' '}
-										{item.status == 3 && 'PROGRESS'}
+										{item.status == 3 && 'FULLFILLED'}
 									</Badge>
 								)}
 							</td>
