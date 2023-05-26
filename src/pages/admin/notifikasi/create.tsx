@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import {
@@ -8,17 +8,13 @@ import {
 	Space,
 	Text,
 	Input,
-	PasswordInput,
-	Divider,
-	TextInput,
-	MultiSelect,
 	Radio,
 	Select,
 	Checkbox,
-	Table,
 } from '@mantine/core';
 import { useId } from '@mantine/hooks';
 import { IMaskInput } from 'react-imask';
+import api from '@/lib/axios';
 
 const SimpleTable: NextPageWithLayout = () => {
 	const [searchValue, onSearchChange] = useState('');
@@ -26,25 +22,46 @@ const SimpleTable: NextPageWithLayout = () => {
 
 	const id = useId();
 
+	const [customers, setCustomers] = useState([]);
+	const customerOptions = customers.map(customer => ({
+		value: customer.id,
+		label: customer.name,
+	}));
+
+	const [contactNumber, setContactNumber] = useState('');
+
+	const [isFormValid, setFormValid] = useState(false);
+
+	useEffect(() => {
+		const getCustomer = async () => {
+			const res = await api.get('/api/show-all-user');
+			setCustomers(res.data);
+		};
+		getCustomer();
+	}, []);
+
+	useEffect(() => {
+		const isInputValid =
+			selectedRadio === 'User'
+				? customerOptions.length > 0
+				: customerOptions.length > 0 && contactNumber !== '';
+		setFormValid(isInputValid);
+	}, [selectedRadio, customerOptions, contactNumber]);
+
 	function selectInput() {
 		if (selectedRadio === 'Customer') {
 			return (
 				<>
 					<Select
 						style={{ width: '300px' }}
-						label="Chooise Customer"
+						label="Choose Customer"
 						placeholder="Pick one"
 						required
-						data={[
-							{ value: 'react', label: 'React' },
-							{ value: 'ng', label: 'Angular' },
-							{ value: 'svelte', label: 'Svelte' },
-							{ value: 'vue', label: 'Vue' },
-						]}
+						data={customerOptions}
 					/>
 					<Select
 						style={{ width: '300px' }}
-						label="Chooise Dicvision"
+						label="Choose Division"
 						required
 						placeholder="Pick one"
 						data={[
@@ -62,7 +79,8 @@ const SimpleTable: NextPageWithLayout = () => {
 							component={IMaskInput}
 							mask="+62 000-0000-0000"
 							id={id}
-							disabled
+							value={contactNumber}
+							onChange={e => setContactNumber(e.target.value)}
 							style={{ cursor: 'not-allowed' }}
 							placeholder="Input Your Contact"
 						/>
@@ -74,15 +92,10 @@ const SimpleTable: NextPageWithLayout = () => {
 				<>
 					<Select
 						style={{ width: '300px' }}
-						label="Chooise Identify"
+						label="Choose Identity"
 						required
 						placeholder="Pick one"
-						data={[
-							{ value: 'react', label: 'React' },
-							{ value: 'ng', label: 'Angular' },
-							{ value: 'svelte', label: 'Svelte' },
-							{ value: 'vue', label: 'Vue' },
-						]}
+						data={customerOptions}
 					/>
 					<Input.Wrapper
 						required
@@ -94,7 +107,8 @@ const SimpleTable: NextPageWithLayout = () => {
 							component={IMaskInput}
 							mask="+62 000-0000-0000"
 							id={id}
-							disabled
+							value={contactNumber}
+							onChange={e => setContactNumber(e.target.value)}
 							style={{ cursor: 'not-allowed' }}
 							placeholder="Input Your Contact"
 						/>
@@ -127,13 +141,13 @@ const SimpleTable: NextPageWithLayout = () => {
 					<Checkbox
 						value="user"
 						style={{ marginLeft: '50px', paddingBottom: '20px', marginTop: '-15px' }}
-						label="Remminder Need to Finish DN"
+						label="Reminder Need to Finish DN"
 					/>
 					<Space h="xs" />
 					<Checkbox
 						value="user"
 						style={{ marginLeft: '50px', paddingBottom: '20px', marginTop: '-15px' }}
-						label="Remainder waiting time baking"
+						label="Reminder waiting time baking"
 					/>
 				</>
 			);
@@ -168,6 +182,13 @@ const SimpleTable: NextPageWithLayout = () => {
 					<h5 style={{ marginLeft: '50px' }}>Choose Type of Notifications *</h5>
 					{renderCheckboxes()}
 				</Group>
+			</Group>
+			<Space h="xl" />
+			<Group position="right">
+				<Button component="a" href="/admin/form/common" variant="outline">
+					Back
+				</Button>
+				<Button disabled={!isFormValid}>Save</Button>
 			</Group>
 		</>
 	);
