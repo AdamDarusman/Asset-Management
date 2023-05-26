@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
-import { PageContainer } from '@/components/PageContainer';
 import {
 	ActionIcon,
 	Button,
@@ -16,12 +15,10 @@ import {
 	Space,
 	Table,
 } from '@mantine/core';
-import { IconEdit, IconEye, IconPlus, IconTrash } from '@tabler/icons-react';
-import { DataTable } from 'mantine-datatable';
-import companies from './companies.json';
 import api from '@/lib/axios';
 import { notifications } from '@mantine/notifications';
 import router from 'next/router';
+import { IconTrash } from '@tabler/icons-react';
 
 const SimpleTable: NextPageWithLayout = () => {
 	const [reservasis, setReservasis] = useState([]);
@@ -102,7 +99,9 @@ const SimpleTable: NextPageWithLayout = () => {
 				autoClose: 5000,
 			});
 		}
+		router.push('/admin/reservasi/common');
 	}
+
 	const [getAddedItems, setGetAddedItems] = useState([]);
 	const [partName, setPartName] = useState('');
 	const [machineName, setMachineName] = useState('');
@@ -125,19 +124,28 @@ const SimpleTable: NextPageWithLayout = () => {
 		}
 	}, [selectedMachine]);
 
-	async function handleAdd() {
-		const qty = document.getElementById('input-demo').value;
+	const [qtyValue, setQtyValue] = useState('');
+	const [isFormValid, setIsFormValid] = useState(false);
 
+	useEffect(() => {
+		if (selectedItem && selectedMachine && qtyValue) {
+			setIsFormValid(true);
+		} else {
+			setIsFormValid(false);
+		}
+	}, [selectedItem, selectedMachine, qtyValue]);
+
+	async function handleAdd() {
 		const newItem = {
 			item: selectedItem,
 			machine: selectedMachine,
-			qty: qty,
+			qty: qtyValue,
 		};
 
 		const newItemName = {
 			item: partName,
 			machine: machineName,
-			qty: qty,
+			qty: qtyValue,
 		};
 
 		setAddedItems(prevItems => [...prevItems, newItem]);
@@ -226,10 +234,21 @@ const SimpleTable: NextPageWithLayout = () => {
 					label="Masukan Qty"
 					style={{ marginTop: '30px' }}
 				>
-					<Input required id="input-demo" placeholder="Masukan Qty" />
+					<Input
+						required
+						id="input-demo"
+						placeholder="Masukan Qty"
+						onChange={e => setQtyValue(e.target.value)}
+						value={qtyValue}
+					/>
 				</Input.Wrapper>
 				<Space w="xl" />
-				<Button color="green" style={{ marginTop: '52px' }} onClick={handleAdd}>
+				<Button
+					color="green"
+					style={{ marginTop: '52px' }}
+					onClick={handleAdd}
+					disabled={!isFormValid}
+				>
 					Add
 				</Button>
 			</Group>
@@ -238,18 +257,14 @@ const SimpleTable: NextPageWithLayout = () => {
 			<Table captionSide="bottom" striped highlightOnHover>
 				<thead>{ths}</thead>
 				<tbody>
-					{getAddedItems.map((reservasi, index) => (
+					{addedItems.map((item, index) => (
 						<tr key={index}>
 							<td>{index + 1}</td>
-							<td>{reservasi.item}</td>
-							<td>{reservasi.machine}</td>
-							<td>{reservasi.qty}</td>
+							<td>{getAddedItems[index].item}</td>
+							<td>{getAddedItems[index].machine}</td>
+							<td>{getAddedItems[index].qty}</td>
 							<td>
-								<Group>
-									<ActionIcon color="red">
-										<IconTrash size={16} />
-									</ActionIcon>
-								</Group>
+								<Button color="red">Delete</Button>
 							</td>
 						</tr>
 					))}
