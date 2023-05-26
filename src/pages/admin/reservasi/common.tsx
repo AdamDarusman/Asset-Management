@@ -4,6 +4,7 @@ import { NextPageWithLayout } from '@/pages/_app';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import {
 	ActionIcon,
+	Badge,
 	Button,
 	Checkbox,
 	Divider,
@@ -188,12 +189,22 @@ const SimpleTable: NextPageWithLayout = () => {
 	};
 
 	const show = id => {
-		router.push(`/admin/mesin/view/${id}`);
+		router.push(`/admin/reservasi/view/${id}`);
 	};
 
 	const editPg = id => {
-		router.push(`/admin/mesin/edit/${id}`);
+		router.push(`/admin/reservasi/edit/${id}`);
 	};
+
+	const createPg = () => {
+		router.push(`/admin/reservasi/create`);
+	};
+	
+	useEffect(() => {
+		const getItem = async () => {
+			const res = await api.post(``)
+		}
+	})
 
 	return (
 		<>
@@ -219,8 +230,8 @@ const SimpleTable: NextPageWithLayout = () => {
 					bottom={-13}
 					left={400}
 					component="a"
-					href="/admin/reservasi/create"
 					rightIcon={<IconPlus />}
+					onClick={createPg}
 				>
 					Tambah Baru
 				</Button>
@@ -250,7 +261,7 @@ const SimpleTable: NextPageWithLayout = () => {
 									opened={noTransitionOpened}
 									onClose={() => setNoTransitionOpened(false)}
 									overlayProps={{
-										opacity: 0.3,
+										opacity: 0.1,
 									}}
 									transitionProps={{
 										transition: 'pop',
@@ -267,9 +278,9 @@ const SimpleTable: NextPageWithLayout = () => {
 												.slice(startIndex, endIndex + 1)
 												.map((item, index) => (
 													<tr key={index}>
-														<td>{item.qtyReservasi}</td>
+														<td>{item.item.partName}</td>
 														<td>{item.machine.name}</td>
-														<td>{item.status}</td>
+														<td>{item.qtyReservasi}</td>
 													</tr>
 												))}
 										</tbody>
@@ -281,7 +292,26 @@ const SimpleTable: NextPageWithLayout = () => {
 							</td>
 							<td>{item.qtyReservasi}</td>
 							<td>{item.machine.name}</td>
-							<td>{item.status}</td>
+							<td>
+								{item.status == 1 && (
+									<Badge style={{ color: 'red' }}>
+										{item.status == 1 && 'REQUESTED'} {item.status == 2 && 'PROGRESS'}{' '}
+										{item.status == 3 && 'PROGRESS'}
+									</Badge>
+								)}
+								{item.status == 2 && (
+									<Badge style={{ color: 'blue' }}>
+										{item.status == 1 && 'REQUESTED'} {item.status == 2 && 'PROGRESS'}{' '}
+										{item.status == 3 && 'PROGRESS'}
+									</Badge>
+								)}
+								{item.status == 3 && (
+									<Badge style={{ color: 'green' }}>
+										{item.status == 1 && 'REQUESTED'} {item.status == 2 && 'PROGRESS'}{' '}
+										{item.status == 3 && 'PROGRESS'}
+									</Badge>
+								)}
+							</td>
 							<td>
 								<Group>
 									<ActionIcon color="green" onClick={() => console.log('Edit:', item.id)}>

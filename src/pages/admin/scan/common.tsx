@@ -81,6 +81,12 @@ const SimpleTable: NextPageWithLayout = () => {
 						}, 2000);
 					}
 				} catch (error) {
+					setScanFailed(true);
+					setScanSuccess(false);
+					setShowFailedBadge(true);
+					setTimeout(() => {
+						setShowFailedBadge(false);
+					}, 2000);
 					// return 'Failed to scan label';
 				}
 			};
@@ -131,7 +137,7 @@ const SimpleTable: NextPageWithLayout = () => {
 								placeholder="QR CODE"
 								miw="1000px"
 								icon={<IconQrcode size="0.8rem" />}
-								disabled={storeScanSuccess}
+								// disabled={storeScanSuccess}
 								onChange={handleInputChange}
 							/>
 						</Input.Wrapper>

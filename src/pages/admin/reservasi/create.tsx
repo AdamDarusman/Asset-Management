@@ -74,9 +74,9 @@ const SimpleTable: NextPageWithLayout = () => {
 		try {
 			// Create an array of data objects to be submitted
 			const dataToSubmit = addedItems.map(item => ({
-				itemId: item.item,
-				machineId: item.machine,
-				qty: item.qty,
+				qtyReservasi: parseInt(item.qty),
+				item: parseInt(item.item),
+				machine: parseInt(item.machine),
 			}));
 
 			// Make the API request to submit the data
@@ -103,6 +103,27 @@ const SimpleTable: NextPageWithLayout = () => {
 			});
 		}
 	}
+	const [getAddedItems, setGetAddedItems] = useState([]);
+	const [partName, setPartName] = useState('');
+	const [machineName, setMachineName] = useState('');
+	useEffect(() => {
+		if (selectedItem) {
+			const nameItem = async id => {
+				const res = await api.get(`item/${id}/show`);
+				setPartName(res.data.partName);
+			};
+			nameItem(selectedItem);
+		}
+	}, [selectedItem]);
+	useEffect(() => {
+		if (selectedMachine) {
+			const nameMachine = async id => {
+				const res = await api.get(`machine/${id}/show`);
+				setMachineName(res.data.name);
+			};
+			nameMachine(selectedMachine);
+		}
+	}, [selectedMachine]);
 
 	async function handleAdd() {
 		const qty = document.getElementById('input-demo').value;
@@ -113,7 +134,15 @@ const SimpleTable: NextPageWithLayout = () => {
 			qty: qty,
 		};
 
+		const newItemName = {
+			item: partName,
+			machine: machineName,
+			qty: qty,
+		};
+
 		setAddedItems(prevItems => [...prevItems, newItem]);
+		setGetAddedItems(prevItems => [...prevItems, newItemName]);
+		console.log(newItemName);
 	}
 
 	useEffect(() => {
@@ -176,7 +205,7 @@ const SimpleTable: NextPageWithLayout = () => {
 						searchable
 						nothingFound="No options"
 						data={itemOptions}
-						onSearchChange={itemOptions => setSelectedItem(itemOptions)}
+						onChange={itemOptions => setSelectedItem(itemOptions)}
 						style={{ marginTop: '30px' }}
 					/>
 				)}
@@ -187,7 +216,7 @@ const SimpleTable: NextPageWithLayout = () => {
 					searchable
 					nothingFound="No options"
 					data={machineOptions}
-					onSearchChange={machineOptions => setSelectedMachine(machineOptions)}
+					onChange={machineOptions => setSelectedMachine(machineOptions)}
 					style={{ marginTop: '30px' }}
 				/>
 				<Space w="xl" />
@@ -209,7 +238,7 @@ const SimpleTable: NextPageWithLayout = () => {
 			<Table captionSide="bottom" striped highlightOnHover>
 				<thead>{ths}</thead>
 				<tbody>
-					{addedItems.map((reservasi, index) => (
+					{getAddedItems.map((reservasi, index) => (
 						<tr key={index}>
 							<td>{index + 1}</td>
 							<td>{reservasi.item}</td>
