@@ -199,13 +199,16 @@ const SimpleTable: NextPageWithLayout = () => {
 	const createPg = () => {
 		router.push(`/admin/reservasi/create`);
 	};
-	
-	useEffect(() => {
-		const getItem = async () => {
-			const res = await api.post(``)
-		}
-	})
+	const modalClick = reservasiNumber => {
+		setNoTransitionOpened(true);
+		getReservasi(reservasiNumber);
+	};
+	const [reservasiByNumber, setReservasiByNumber] = useState([]);
 
+	const getReservasi = async reservasiNumber => {
+		const res = await api.get(`reservasi/${reservasiNumber}`);
+		setReservasiByNumber(res.data);
+	};
 	return (
 		<>
 			<Group>
@@ -274,19 +277,17 @@ const SimpleTable: NextPageWithLayout = () => {
 									<Table captionSide="bottom" striped highlightOnHover>
 										<thead>{thx}</thead>
 										<tbody>
-											{machinesToDisplay
-												.slice(startIndex, endIndex + 1)
-												.map((item, index) => (
-													<tr key={index}>
-														<td>{item.item.partName}</td>
-														<td>{item.machine.name}</td>
-														<td>{item.qtyReservasi}</td>
-													</tr>
-												))}
+											{reservasiByNumber.map(res => (
+												<tr>
+													<td>{res.item.partName}</td>
+													<td>{res.machine.name}</td>
+													<td>{res.qtyReservasi}</td>
+												</tr>
+											))}
 										</tbody>
 									</Table>
 								</Modal>
-								<Button onClick={() => setNoTransitionOpened(true)} color="violet">
+								<Button onClick={() => modalClick(item.reservasiNumber)} color="violet">
 									Lihat Material
 								</Button>
 							</td>
