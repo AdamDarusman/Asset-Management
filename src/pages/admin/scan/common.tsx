@@ -103,12 +103,24 @@ const SimpleTable: NextPageWithLayout = () => {
 		}, 2500);
 	};
 
+	const [scanOutSuccess, setScanOutSuccess] = useState(false);
+	const [resCode, setResCode] = useState('');
+	const timeoutRefOut = useRef(null);
+	const handleInputChangeOut = e => {
+		clearTimeout(timeoutRefOut.current);
+
+		timeoutRefOut.current = setTimeout(() => {
+			setResCode(e.target.value);
+		}, 2500);
+		console.log(resCode);
+	};
+
 	function selectInput() {
 		if (selectedRadio === 'Masuk') {
 			return (
 				<>
 					<Group my="20px" style={{ display: 'flex', flexDirection: 'column' }}>
-						<Input.Wrapper label="Scan your code here" size="15px">
+						<Input.Wrapper label="Scan in here" size="15px">
 							{showSuccessBadge && (
 								<Badge
 									color="green"
@@ -220,58 +232,97 @@ const SimpleTable: NextPageWithLayout = () => {
 			return (
 				<>
 					<style>{styles}</style>
-					<Group style={{ width: '400px', marginTop: '-160px' }}>
-						<p>Reservasi Baru:</p>
-						<p>[reservasi baru]</p>
-						<Table
-							style={{ marginTop: '-30px', width: '1000px' }}
-							captionSide="bottom"
-							fontSize="xs"
-							highlightOnHover
-						>
-							<thead>{ths}</thead>
-							<tbody>{rows}</tbody>
-						</Table>
+					<Group my="20px" style={{ display: 'flex', flexDirection: 'column' }}>
+						<Input.Wrapper label="Scan out here" size="15px">
+							{showSuccessBadge && (
+								<Badge
+									color="green"
+									size="xl"
+									radius="md"
+									variant="filled"
+									mx="10px"
+									my="sm"
+								>
+									Berhasil
+								</Badge>
+							)}
+							{showFailedBadge && (
+								<Badge
+									color="red"
+									size="xl"
+									radius="md"
+									variant="filled"
+									mx="10px"
+									my="sm"
+								>
+									Failed
+								</Badge>
+							)}
+							<Input
+								placeholder="QR CODE"
+								miw="1000px"
+								icon={<IconQrcode size="0.8rem" />}
+								// disabled={storeScanSuccess}
+								onChange={handleInputChangeOut}
+							/>
+						</Input.Wrapper>
 					</Group>
-					<Divider
-						h="393px"
-						size="md"
-						orientation="vertical"
-						style={{ marginLeft: '100px' }}
-					/>
-					<Group style={{ marginTop: '-250px', width: '390px' }}>
-						<p style={{ fontSize: '15px' }}>Scan Your QR CODE Here</p>
-						<Badge
-							color="green"
-							size="lg"
-							radius="md"
-							variant="filled"
-							style={{ width: '200px' }}
-						>
-							Transaksi Berhasil
-						</Badge>
-						<Badge
-							color="gray"
-							size="lg"
-							radius="md"
-							variant="filled"
-							style={{ width: '100%', marginTop: '-20px' }}
-						>
-							<p
-								style={{
-									marginRight: '1000px',
-									color: 'black',
-									fontSize: '15px',
-								}}
-							>
-								QR CODE
-							</p>
-						</Badge>
-						<Stack>
-							<p style={{ marginTop: '-10px' }}>Nama Item :</p>
-							<p style={{ marginTop: '-30px' }}>Lokasi Rak :</p>
-						</Stack>
-					</Group>
+					{scanOutSuccess && (
+						<>
+							<Group style={{ width: '400px', marginTop: '-160px' }}>
+								<p>Reservasi Baru:</p>
+								<p>[reservasi baru]</p>
+								<Table
+									style={{ marginTop: '-30px', width: '1000px' }}
+									captionSide="bottom"
+									fontSize="xs"
+									highlightOnHover
+								>
+									<thead>{ths}</thead>
+									<tbody>{rows}</tbody>
+								</Table>
+							</Group>
+							<Divider
+								h="393px"
+								size="md"
+								orientation="vertical"
+								style={{ marginLeft: '100px' }}
+							/>
+							<Group style={{ marginTop: '-250px', width: '390px' }}>
+								<p style={{ fontSize: '15px' }}>Scan Your QR CODE Here</p>
+								<Badge
+									color="green"
+									size="lg"
+									radius="md"
+									variant="filled"
+									style={{ width: '200px' }}
+								>
+									Transaksi Berhasil
+								</Badge>
+								<Badge
+									color="gray"
+									size="lg"
+									radius="md"
+									variant="filled"
+									style={{ width: '100%', marginTop: '-20px' }}
+								>
+									<p
+										style={{
+											marginRight: '1000px',
+											color: 'black',
+											fontSize: '15px',
+										}}
+									>
+										QR CODE
+									</p>
+								</Badge>
+								<Stack>
+									<p style={{ marginTop: '-10px' }}>Nama Item :</p>
+									<p style={{ marginTop: '-30px' }}>Lokasi Rak :</p>
+								</Stack>
+							</Group>
+						</>
+					)}
 				</>
 			);
 		}

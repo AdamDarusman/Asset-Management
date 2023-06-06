@@ -6,9 +6,10 @@ import api from '@/lib/axios';
 
 export async function getServerSideProps(context) {
 	const { id } = context.query;
-	const user = await fetch(`http://localhost:8000/api/${id}/show`).then(res =>
-		res.json()
-	);
+	const res = await api.get(`http://localhost:8000/api/${id}/show`);
+
+	const user = res.data;
+
 	return { props: { user } };
 }
 

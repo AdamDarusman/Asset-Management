@@ -10,11 +10,7 @@ import { getCookie } from 'cookies-next';
 
 export async function getServerSideProps(context) {
 	const { id } = context.query;
-	const response = await api.get(`item/${id}/show`, {
-		headers: {
-			Authorization: getCookie('authorization'),
-		},
-	});
+	const response = await api.get(`item/${id}/show`);
 
 	const item = response.data;
 

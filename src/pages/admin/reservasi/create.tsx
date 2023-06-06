@@ -85,21 +85,21 @@ const SimpleTable: NextPageWithLayout = () => {
 			// Show success notification
 			notifications.show({
 				title: 'Success',
-				message: 'Your registration has been successfully submitted!',
+				message: 'successfully submitted!',
 				color: 'teal',
 				icon: <CheckIcon />,
 				autoClose: 5000,
 			});
+			router.push('/admin/reservasi/common');
 		} catch (error) {
 			console.error(error);
 			notifications.show({
 				title: 'Error',
-				message: 'Failed to submit your registration. Please try again later.',
+				message: 'Failed to submit. Please try again.',
 				color: 'red',
 				autoClose: 5000,
 			});
 		}
-		router.push('/admin/reservasi/common');
 	}
 
 	const [getAddedItems, setGetAddedItems] = useState([]);
@@ -150,8 +150,16 @@ const SimpleTable: NextPageWithLayout = () => {
 
 		setAddedItems(prevItems => [...prevItems, newItem]);
 		setGetAddedItems(prevItems => [...prevItems, newItemName]);
+		setSelectedItem(null);
+		setSelectedMachine(null);
+		setQtyValue(null);
 		console.log(newItemName);
 	}
+
+	const handleDelete = index => {
+		setAddedItems(prevItems => prevItems.filter((item, i) => i !== index));
+		setGetAddedItems(prevItems => prevItems.filter((item, i) => i !== index));
+	};
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -264,7 +272,9 @@ const SimpleTable: NextPageWithLayout = () => {
 							<td>{getAddedItems[index].machine}</td>
 							<td>{getAddedItems[index].qty}</td>
 							<td>
-								<Button color="red">Delete</Button>
+								<Button onClick={() => handleDelete(index)} color="red">
+									Delete
+								</Button>
 							</td>
 						</tr>
 					))}

@@ -67,6 +67,20 @@ const UserTable: NextPageWithLayout = () => {
 		router.push(`/admin/form/view/${id}`);
 	};
 
+	const handleDeleteMany = async () => {
+		try {
+			await api.post('api/deleteMany', selectedRows);
+			setElements(prevData =>
+				prevData.filter(dataItem => !selectedRows.includes(dataItem))
+			);
+			showNotification({
+				title: 'Berhasil!',
+				message: 'Data berhasil dihapus',
+				color: 'green',
+			});
+		} catch (error) {}
+	};
+
 	const ths = (
 		<tr>
 			<th>
@@ -82,7 +96,13 @@ const UserTable: NextPageWithLayout = () => {
 			<th>Role</th>
 			<th>NIP</th>
 			<th>Contact Number</th>
-			<th>Action</th>
+			{selectedRows.length > 0 || selectAll ? (
+				<Button onClick={() => handleDeleteMany()} color="red">
+					Delete
+				</Button>
+			) : (
+				<th>Action</th>
+			)}
 		</tr>
 	);
 

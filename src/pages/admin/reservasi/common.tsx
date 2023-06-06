@@ -139,7 +139,7 @@ const SimpleTable: NextPageWithLayout = () => {
 			</th>
 			<th>Reservasi Number</th>
 			<th>Nama Material</th>
-			<th>Qty</th>
+			{/* <th>Qty</th> */}
 			<th>User Name</th>
 			<th>Status</th>
 			<th>
@@ -286,6 +286,15 @@ const SimpleTable: NextPageWithLayout = () => {
 													<td>{res.qtyReservasi}</td>
 												</tr>
 											))}
+											<tr>
+												<td style={{ fontWeight: 'bold' }}>Qty Total</td>
+												<td></td>
+												<td style={{ fontWeight: 'bold' }}>
+													{reservasiByNumber
+														.map(res => res.qtyReservasi)
+														.reduce((acc, curr) => acc + curr, 0)}
+												</td>
+											</tr>
 										</tbody>
 									</Table>
 								</Modal>
@@ -293,8 +302,13 @@ const SimpleTable: NextPageWithLayout = () => {
 									Lihat Material
 								</Button>
 							</td>
-							<td>{item.qtyReservasi}</td>
-							<td>{item.machine.name}</td>
+							{/* <td>
+								{reservasiByNumber
+									.map(res => res.qtyReservasi)
+									.reduce((acc, curr) => acc + curr, 0)}
+							</td> */}
+							{/* <td>{item.qtyReservasi}</td> */}
+							<td>{item.user ? item.user.name : ''}</td>
 							<td>
 								{item.status == 1 && (
 									<Badge style={{ color: 'red' }}>
@@ -317,12 +331,12 @@ const SimpleTable: NextPageWithLayout = () => {
 							</td>
 							<td>
 								<Group>
-									<ActionIcon color="green" onClick={() => console.log('Edit:', item.id)}>
+									{/* <ActionIcon color="green" onClick={() => console.log('Edit:', item.id)}>
 										<IconScan size={16} />
 									</ActionIcon>
 									<ActionIcon component="a" color="blue" onClick={() => show(item.id)}>
 										<IconEye size={16} />
-									</ActionIcon>
+									</ActionIcon> */}
 									<ActionIcon
 										color="yellow"
 										component="a"
