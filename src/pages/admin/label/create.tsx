@@ -14,6 +14,7 @@ import {
 	MultiSelect,
 	Select,
 	CheckIcon,
+	Paper,
 } from '@mantine/core';
 import api from '@/lib/axios';
 import { useRouter } from 'next/router';
@@ -29,7 +30,10 @@ const CreateLabel = () => {
 	const [qty, setQty] = useState('');
 
 	const [items, setItems] = useState([]);
-	const itemOptions = items.map(item => ({ value: item.id, label: item.partNumber }));
+	const itemOptions = items.map(item => ({
+		value: item.id,
+		label: `${item.partName} || ${item.partNumber}`,
+	}));
 
 	const [noLabel, setNoLabel] = useState([]);
 	useEffect(() => {
@@ -74,13 +78,24 @@ const CreateLabel = () => {
 
 			notifications.show({
 				title: 'Error',
-				message: 'Duplicate data or qty not equal.',
+				message: 'Duplicate Kode Gi',
 				color: 'red',
 				icon: <IconHomeCancel />,
 				autoClose: 5000,
 			});
 		}
 	};
+
+	const [qtySelectedItem, setQtySelectedItem] = useState<any>([]);
+	useEffect(() => {
+		if (item) {
+			const getItem = async item => {
+				const res = await api.get(`item/${item}/show`);
+				setQtySelectedItem(res.data);
+			};
+			getItem(item);
+		}
+	}, [item]);
 
 	return (
 		<>
@@ -93,19 +108,26 @@ const CreateLabel = () => {
 					onChange={e => setKodeGi(e.target.value)}
 				/>
 				<Space w="xl" />
-				{items && (
-					<Select
-						style={{ width: '250px' }}
-						data={itemOptions}
-						label="Pilih Material"
-						placeholder="choose an item"
-						searchable
-						searchValue={searchValue}
-						onChange={itemOptions => setItem(itemOptions)}
-						onSearchChange={onSearchChange}
-						nothingFound="Nothing found"
-					/>
-				)}
+				<Paper mt="20px" style={{ display: 'flex', flexDirection: 'column' }}>
+					{items && (
+						<Select
+							mt="5px"
+							style={{ width: '250px' }}
+							data={itemOptions}
+							label="Pilih Item"
+							placeholder="choose an item"
+							searchable
+							searchValue={searchValue}
+							onChange={itemOptions => setItem(itemOptions)}
+							onSearchChange={onSearchChange}
+							nothingFound="Nothing found"
+						/>
+					)}
+					<span>
+						<span style={{ color: 'red' }}>* </span>
+						{qtySelectedItem.qty}
+					</span>
+				</Paper>
 				<Space w="xl" />
 				<TextInput
 					style={{ width: '250px' }}

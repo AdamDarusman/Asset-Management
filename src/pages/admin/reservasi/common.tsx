@@ -283,7 +283,7 @@ const SimpleTable: NextPageWithLayout = () => {
 												<tr>
 													<td>{res.item.partName}</td>
 													<td>{res.machine.name}</td>
-													<td>{res.qtyReservasi}</td>
+													<td>{res.item?.qty}</td>
 												</tr>
 											))}
 											<tr>
@@ -291,7 +291,7 @@ const SimpleTable: NextPageWithLayout = () => {
 												<td></td>
 												<td style={{ fontWeight: 'bold' }}>
 													{reservasiByNumber
-														.map(res => res.qtyReservasi)
+														.map(res => res.item?.qty)
 														.reduce((acc, curr) => acc + curr, 0)}
 												</td>
 											</tr>

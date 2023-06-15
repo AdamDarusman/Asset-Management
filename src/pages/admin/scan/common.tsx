@@ -22,6 +22,7 @@ import {
 import { useId } from '@mantine/hooks';
 import { IconQrcode } from '@tabler/icons-react';
 import api from '@/lib/axios';
+import { format } from 'date-fns';
 
 const SimpleTable: NextPageWithLayout = () => {
 	const [selectedRadio, setSelectedRadio] = useState('Customer');
@@ -33,6 +34,8 @@ const SimpleTable: NextPageWithLayout = () => {
 	const [storeScanSuccess, setStoreScanSuccess] = useState(false);
 	const [showSuccessBadge, setShowSuccessBadge] = useState(false);
 	const [showFailedBadge, setShowFailedBadge] = useState(false);
+
+	const currentDate = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 
 	useEffect(() => {
 		if (scanSuccess) {
@@ -47,10 +50,9 @@ const SimpleTable: NextPageWithLayout = () => {
 						store: 1,
 					});
 					setStoreScanSuccess(true);
-					console.log(label.id);
 
 					await api.patch(`label/${label.id}/edit`, {
-						isScanned: '1',
+						scanIn: currentDate,
 					});
 					setShowSuccessBadge(true);
 					setTimeout(() => {
@@ -68,7 +70,7 @@ const SimpleTable: NextPageWithLayout = () => {
 				try {
 					const res = await api.get(`label/${code}`);
 					setLabel(res.data);
-					if (res.data.isScanned === 0) {
+					if (res.data.scanIn === null) {
 						setScanSuccess(true);
 						setScanFailed(false);
 						setShowFailedBadge(false);
@@ -100,20 +102,119 @@ const SimpleTable: NextPageWithLayout = () => {
 
 		timeoutRef.current = setTimeout(() => {
 			setCode(e.target.value);
-		}, 2500);
+		}, 2000);
 	};
 
 	const [scanOutSuccess, setScanOutSuccess] = useState(false);
+	const [scanOutFailed, setScanOutFailed] = useState(false);
 	const [resCode, setResCode] = useState('');
+	const [resNum, setResNum] = useState<any>([]);
+	const [codeOut, setCodeOut] = useState('');
+
+	const outScanTime = useRef(null);
+	const handleInputChangeScanOut = e => {
+		clearTimeout(outScanTime.current);
+		outScanTime.current = setTimeout(() => {
+			setCodeOut(e.target.value);
+		}, 2000);
+	};
 	const timeoutRefOut = useRef(null);
 	const handleInputChangeOut = e => {
 		clearTimeout(timeoutRefOut.current);
 
 		timeoutRefOut.current = setTimeout(() => {
 			setResCode(e.target.value);
-		}, 2500);
-		console.log(resCode);
+		}, 2000);
 	};
+	useEffect(() => {
+		if (resCode) {
+			const getReservasi = async resCode => {
+				const res = await api.get(`reservasi/${resCode}`);
+				setResNum(res.data);
+			};
+			getReservasi(resCode);
+		}
+	});
+	useEffect(() => {
+		if (resCode) {
+			const searchReservasiNumber = async resCode => {
+				try {
+					const resCodeComp = resCode.replace(/\s/g, '');
+					const res = await api.get(`reservasi/${resCodeComp}`);
+					// setResNum(res.data);
+
+					if (!(res.data && res.data.length === 0)) {
+						setStoreScanSuccess(true);
+						setScanOutSuccess(true);
+						setScanOutFailed(false);
+						setShowFailedBadge(false);
+						setShowSuccessBadge(true);
+						setTimeout(() => {
+							setShowSuccessBadge(false);
+						}, 2000);
+					} else {
+						// setScanOutFailed(true);
+						// setScanOutSuccess(false);
+						setShowFailedBadge(true);
+						setTimeout(() => {
+							setShowFailedBadge(false);
+						}, 2000);
+					}
+				} catch (error) {
+					// setScanOutFailed(true);
+					// setScanOutSuccess(false);
+					setShowFailedBadge(true);
+					setTimeout(() => {
+						setShowFailedBadge(false);
+					}, 2000);
+				}
+			};
+			searchReservasiNumber(resCode);
+		}
+	}, [resCode]);
+
+	useEffect(() => {
+		if (codeOut) {
+			const searchLabel = async codeOut => {
+				try {
+					const res = await api.get(`label/${codeOut}`);
+
+					const item = await api.get(
+						`item/${res.data.item ? res.data.item.id : ''}/show`
+					);
+
+					await api.post(`reservasi/${resCode}/scanOut`, {
+						item: parseInt(res.data.item ? res.data.item.id : ''),
+						noLabel: codeOut,
+					});
+
+					await api.patch(`label/${res.data.id}/edit`, {
+						scanOut: currentDate,
+					});
+					setTimeout(() => {
+						setShowSuccessBadge(false);
+					}, 2000);
+					setItem(item);
+					setLabel(res.data);
+					setScanOutSuccess(true);
+					setScanOutFailed(false);
+					setShowFailedBadge(false);
+					setShowSuccessBadge(true);
+					setTimeout(() => {
+						setShowSuccessBadge(false);
+					}, 2000);
+				} catch (error) {
+					// setScanOutFailed(true);
+					// setScanOutSuccess(false);
+					setShowFailedBadge(true);
+					setTimeout(() => {
+						setShowFailedBadge(false);
+					}, 2000);
+				}
+			};
+			searchLabel(codeOut);
+		}
+	}, [codeOut]);
 
 	function selectInput() {
 		if (selectedRadio === 'Masuk') {
@@ -174,59 +275,51 @@ const SimpleTable: NextPageWithLayout = () => {
 				</tr>
 			);
 
-			const elements = [
-				{
-					no: 1,
-					item: 'nama item',
-					qty: 'qty reservasi',
-					progress: 'qty his scanned',
-					status: 'gagal',
-				},
-				{
-					no: 2,
-					item: 'nama item',
-					qty: 'qty reservasi',
-					progress: 'qty his scanned',
-					status: 'berhasil',
-				},
-			];
-
-			const rows = elements.map(element => (
-				<tr key={element.progress}>
-					<td>{element.no}</td>
-					<td>{element.item}</td>
-					<td>{element.progress}</td>
-					<td>{element.qty}</td>
+			const rows = resNum.map((res, index) => (
+				<tr key={res.item}>
+					<td>{index + 1}</td>
+					<td>{res.item?.partName}</td>
+					<td>{res.qtyReservasi}</td>
+					<td>{res.qtyScan}</td>
 					<td>
-						<span
-							className={element.status === 'berhasil' ? 'success' : 'failure'}
-						></span>
+						{res.status == 1 ? <span className="failure"></span> : ''}
+						{res.status == 2 ? <span className="warn"></span> : ''}
+						{res.status == 3 ? <span className="success"></span> : ''}
 					</td>
 				</tr>
 			));
 
 			const styles = `
-        .success {
-          display: inline-block;
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background-color: green;
-          margin-right: 5px;
-        }
+				.success {
+				display: inline-block;
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background-color: green;
+				margin-right: 5px;
+				}
 
-        .failure {
-          display: inline-block;
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background-color: red;
-          margin-right: 5px;
-        }
+				.failure {
+				display: inline-block;
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background-color: red;
+				margin-right: 5px;
+				}
 
-        .status-text {
-          display: none;
-        }
+				.warn {
+				display: inline-block;
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background-color: yellow;
+				margin-right: 5px;
+				}
+
+				.status-text {
+				display: none;
+				}
       `;
 
 			return (
@@ -234,44 +327,31 @@ const SimpleTable: NextPageWithLayout = () => {
 					<style>{styles}</style>
 					<Group my="20px" style={{ display: 'flex', flexDirection: 'column' }}>
 						<Input.Wrapper label="Scan out here" size="15px">
-							{showSuccessBadge && (
-								<Badge
-									color="green"
-									size="xl"
-									radius="md"
-									variant="filled"
-									mx="10px"
-									my="sm"
-								>
-									Berhasil
-								</Badge>
-							)}
-							{showFailedBadge && (
-								<Badge
-									color="red"
-									size="xl"
-									radius="md"
-									variant="filled"
-									mx="10px"
-									my="sm"
-								>
-									Failed
-								</Badge>
-							)}
 							<Input
 								placeholder="QR CODE"
 								miw="1000px"
 								icon={<IconQrcode size="0.8rem" />}
-								// disabled={storeScanSuccess}
+								disabled={storeScanSuccess}
 								onChange={handleInputChangeOut}
 							/>
 						</Input.Wrapper>
 					</Group>
 					{scanOutSuccess && (
 						<>
-							<Group style={{ width: '400px', marginTop: '-160px' }}>
-								<p>Reservasi Baru:</p>
-								<p>[reservasi baru]</p>
+							<Group style={{ width: '400px', marginTop: '-260px' }}>
+								<p>
+									Nomor Reservasi:{' '}
+									<span
+										style={{
+											background: '#CCCCCC',
+											paddingLeft: '2px',
+											paddingRight: '2px',
+											borderRadius: '3px',
+										}}
+									>
+										{resNum[0].reservasiNumber}
+									</span>
+								</p>
 								<Table
 									style={{ marginTop: '-30px', width: '1000px' }}
 									captionSide="bottom"
@@ -289,37 +369,45 @@ const SimpleTable: NextPageWithLayout = () => {
 								style={{ marginLeft: '100px' }}
 							/>
 							<Group style={{ marginTop: '-250px', width: '390px' }}>
-								<p style={{ fontSize: '15px' }}>Scan Your QR CODE Here</p>
-								<Badge
-									color="green"
-									size="lg"
-									radius="md"
-									variant="filled"
-									style={{ width: '200px' }}
-								>
-									Transaksi Berhasil
-								</Badge>
-								<Badge
-									color="gray"
-									size="lg"
-									radius="md"
-									variant="filled"
-									style={{ width: '100%', marginTop: '-20px' }}
-								>
-									<p
-										style={{
-											marginRight: '1000px',
-											color: 'black',
-											fontSize: '15px',
-										}}
-									>
-										QR CODE
-									</p>
-								</Badge>
-								<Stack>
-									<p style={{ marginTop: '-10px' }}>Nama Item :</p>
-									<p style={{ marginTop: '-30px' }}>Lokasi Rak :</p>
-								</Stack>
+								<Input.Wrapper label="Scan out here" size="15px">
+									{showSuccessBadge && (
+										<Badge
+											color="green"
+											size="xl"
+											radius="md"
+											variant="filled"
+											mx="10px"
+											my="sm"
+										>
+											Berhasil
+										</Badge>
+									)}
+									{showFailedBadge && (
+										<Badge
+											color="red"
+											size="xl"
+											radius="md"
+											variant="filled"
+											mx="10px"
+											my="sm"
+										>
+											Failed
+										</Badge>
+									)}
+									<Input
+										placeholder="QR CODE"
+										w="450px"
+										icon={<IconQrcode size="0.8rem" />}
+										onChange={handleInputChangeScanOut}
+									/>
+								</Input.Wrapper>
+								{scanOutSuccess && (
+									<>
+										<Stack>
+											<p style={{ marginTop: '-10px' }}>Nama Item : {item.partName}</p>
+										</Stack>
+									</>
+								)}
 							</Group>
 						</>
 					)}
@@ -334,8 +422,17 @@ const SimpleTable: NextPageWithLayout = () => {
 			<Radio.Group value={selectedRadio} onChange={value => setSelectedRadio(value)}>
 				<Space />
 				<Group>
-					<Radio value="Masuk" label="Transaksi Masuk" />
-					<Radio value="Keluar" label="Transaksi Keluar" />
+					{selectedRadio != 'Customer' ? (
+						<>
+							<Radio value="Masuk" disabled label="Transaksi Masuk" />
+							<Radio value="Keluar" disabled label="Transaksi Keluar" />
+						</>
+					) : (
+						<>
+							<Radio value="Masuk" label="Transaksi Masuk" />
+							<Radio value="Keluar" label="Transaksi Keluar" />
+						</>
+					)}
 				</Group>
 			</Radio.Group>
 			<Divider size="md" mt="md" />

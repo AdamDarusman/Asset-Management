@@ -102,7 +102,8 @@ const LabelList = () => {
 			</th>
 			<th>No Label</th>
 			<th>No Gi</th>
-			<th>Nama Material</th>
+			<th>Nama Item</th>
+			<th>Qty</th>
 			<th>Date Created</th>
 			<th>Action</th>
 		</tr>
@@ -217,7 +218,8 @@ const LabelList = () => {
 							</td>
 							<td> {label.noLabel} </td>
 							<td> {label.kodeGi} </td>
-							<td> {label.item ? label.item.partName : ''} </td>
+							<td> {label.item?.partName} </td>
+							<td> {label.qty} </td>
 							<td> {format(new Date(label.createdAt), 'dd/MM/yyyy')} </td>
 							<td>
 								{' '}

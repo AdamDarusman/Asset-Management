@@ -31,17 +31,6 @@ const UpdateMachine = ({ machine }) => {
 		router.push('/admin/mesin/common');
 	}
 
-	const handleCheckboxChange = e => {
-		const value = e.target.value;
-		const isChecked = e.target.checked;
-
-		if (isChecked) {
-			setSelectedPermission([...selectedPermissions, value]);
-		} else {
-			setSelectedPermission(selectedPermissions.filter(item => item !== value));
-		}
-	};
-
 	const handleAssignPermission = async machineId => {
 		await fetch(`http://localhost:8000/machine/machine-permission/${machineId}`, {
 			method: 'post',
@@ -94,7 +83,7 @@ const UpdateMachine = ({ machine }) => {
 				</Button>
 			</Group>
 			<Group position="right">
-				<h2 style={{ marginTop: '-100px', marginBottom: '50px' }}>Create New machine</h2>
+				<h2 style={{ marginTop: '-100px', marginBottom: '50px' }}>Edit Machine</h2>
 			</Group>
 			<Group>
 				<Input.Wrapper id="input-demo" withAsterisk label="Name">
